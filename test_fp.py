@@ -9,10 +9,11 @@ import json
 import shutil
 
 from util import load_ckp, save_ckp, create_train_set
-from sfnet.transformations import TransformNeuralfp
 from sfnet.data import NeuralfpDataset
 from sfnet.modules.simclr import SimCLR
 from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
+from sfnet.gpu_transformations import GPUTransformNeuralfp
+
 from eval import get_index, load_memmap_data, eval_faiss
 from torch.utils.data.sampler import SubsetRandomSampler
 
@@ -133,7 +134,7 @@ def main():
     if not args.nb:
 
         print("Creating dataloaders ...")
-        dataset = NeuralfpDataset(path=args.test_dir, transform=TransformNeuralfp(ir_dir=ir_dir, noise_dir=noise_dir,sample_rate=22050), train=False)
+        dataset = NeuralfpDataset(path=args.test_dir, transform=GPUTransformNeuralfp(ir_dir=ir_dir, noise_dir=noise_dir,sample_rate=22050), train=False)
 
 
         dataset_size = len(dataset)
