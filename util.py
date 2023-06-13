@@ -5,6 +5,7 @@ import json
 import glob
 import soundfile as sf
 import shutil
+import yaml
 
 def load_index(data_dir, ext=['wav','mp3']):
     dataset = {}
@@ -56,7 +57,6 @@ def load_augmentation_index(data_dir, splits, ext=['wav','mp3'], shuffle_dataset
 
     # print(dataset)
     return dataset
-    
 
 
 def get_frames(y, frame_length, hop_length):
@@ -81,6 +81,13 @@ def save_ckp(state,epoch,model_name,model_folder):
         os.mkdir(model_folder)
     torch.save(state, "{}/model_{}_epoch_{}.pth".format(model_folder, model_name, epoch))
 
+def load_config(config_path):
+    with open(config_path, 'r') as fp:
+        config = yaml.safe_load(fp)
+    return config
+
+def override(config_val, arg):
+    return arg if arg is not None else config_val 
 
 def create_fp_dir(resume=None, ckp=None, epoch=1):
     parent_dir = 'logs/emb'

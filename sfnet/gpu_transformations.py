@@ -6,16 +6,20 @@ import warnings
 
 class GPUTransformNeuralfp(nn.Module):
     
-    def __init__(self, ir_dir, noise_dir, sample_rate, n_frames=240, train=True, cpu=False):
+    def __init__(self, ir_dir, noise_dir, cfg, train=True, cpu=False):
         super(GPUTransformNeuralfp, self).__init__()
-        self.sample_rate = sample_rate
+        self.sample_rate = cfg['fs']
         self.ir_dir = ir_dir
-        self.n_frames = n_frames
+        self.noise_dir = noise_dir
+        self.n_frames = cfg['n_frames']
         self.train = train
         self.cpu = cpu
         self.gpu_transform = Compose([
             # ApplyImpulseResponse(ir_paths=self.ir_dir, p=0.5),
-            AddBackgroundNoise(background_paths=noise_dir, min_snr_in_db=0, max_snr_in_db=10,p=0.8),
+            AddBackgroundNoise(background_paths=self.noise_dir, 
+                               min_snr_in_db=cfg['tr_snr'][0], 
+                               max_snr_in_db=cfg['tr_snr'][1], 
+                               p=1),            
             ])
         
         self.cpu_transform = Compose([
@@ -25,16 +29,19 @@ class GPUTransformNeuralfp(nn.Module):
         
         self.val_transform = Compose([
             ApplyImpulseResponse(ir_paths=self.ir_dir, p=1),
-            AddBackgroundNoise(background_paths=noise_dir, min_snr_in_db=0, max_snr_in_db=10,p=1),
+            AddBackgroundNoise(background_paths=self.noise_dir, 
+                               min_snr_in_db=cfg['val_snr'][0], 
+                               max_snr_in_db=cfg['val_snr'][1], 
+                               p=1),
             ])
         
         self.logmelspec = nn.Sequential(
-            MelSpectrogram(sample_rate=22050, win_length=740, hop_length=185, n_fft=740, n_mels=128),
+            MelSpectrogram(sample_rate=self.sample_rate, win_length=cfg['win_len'], hop_length=cfg['hop_len'], n_fft=cfg['n_fft'], n_mels=cfg['n_mels']),
             AmplitudeToDB()
         ) 
         self.spec_aug = nn.Sequential(
-            TimeMasking(time_mask_param=80),
-            FrequencyMasking(freq_mask_param=64)
+            TimeMasking(time_mask_param=cfg['time_mask']),
+            FrequencyMasking(freq_mask_param=cfg['freq_mask'])
 )
 
     def forward(self, x_i, x_j):

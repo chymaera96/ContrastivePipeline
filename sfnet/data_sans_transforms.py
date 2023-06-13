@@ -10,20 +10,19 @@ import warnings
 import torch.nn as nn
 import warnings
 
-
 from util import load_index, get_frames, qtile_normalize
 
-clip_len = 2.0
-SAMPLE_RATE = 22050
 
 class NeuralfpDataset(Dataset):
-    def __init__(self, path, n_frames=240, offset=0.2, norm=0.95, transform=None, train=False):
+    def __init__(self, path, cfg, transform=None, train=False):
         self.path = path
         self.transform = transform
         self.train = train
-        self.norm = norm
-        self.offset = offset 
-        self.n_frames = n_frames
+        self.norm = cfg['norm']
+        self.offset = cfg['offset']
+        self.sample_rate = cfg['fs']
+        self.dur = cfg['dur']
+        self.n_frames = cfg
         self.filenames = load_index(path)
 
         self.ignore_idx = []
@@ -46,10 +45,10 @@ class NeuralfpDataset(Dataset):
         audio_mono = audio.mean(dim=0)
         if self.norm is not None:
             audio_mono = qtile_normalize(audio_mono, q=self.norm)
-        resampler = torchaudio.transforms.Resample(sr, SAMPLE_RATE)
+        resampler = torchaudio.transforms.Resample(sr, self.sample_rate)
         audio_resampled = resampler(audio_mono)    
 
-        clip_frames = int(SAMPLE_RATE*clip_len)
+        clip_frames = int(self.sample_rate*self.dur)
         
         if len(audio_resampled) <= clip_frames:
             self.ignore_idx.append(idx)
@@ -57,7 +56,7 @@ class NeuralfpDataset(Dataset):
         
         #   For training pipeline, output a random frame of the audio
         if self.train:
-            offset_mod = int(SAMPLE_RATE*(self.offset) + clip_frames)
+            offset_mod = int(self.sample_rate*(self.offset) + clip_frames)
             if len(audio_resampled) < offset_mod:
                 print(len(audio_resampled), offset_mod)
             r = np.random.randint(0,len(audio_resampled)-offset_mod)

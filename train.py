@@ -5,9 +5,11 @@ import torch
 import gc
 import torch.nn.functional as F
 from torch.utils.data.sampler import SubsetRandomSampler
+from torch.utils.tensorboard import SummaryWriter
 
 
-from util import load_ckp, save_ckp, load_augmentation_index, create_fp_dir, load_index
+from util import *
+from ntxent import ntxent_loss
 from sfnet.gpu_transformations import GPUTransformNeuralfp
 from sfnet.data_sans_transforms import NeuralfpDataset
 from sfnet.modules.simclr import SimCLR
@@ -26,53 +28,22 @@ device = torch.device("cuda")
 
 
 parser = argparse.ArgumentParser(description='Neuralfp Training')
-parser.add_argument('--data_dir', default='', type=str,
+parser.add_argument('--config', default=None, type=str,
                     help='Path to training data')
-parser.add_argument('--ir_dir', default='', type=str,
-                    help='Path to impulse response data (augmentation)')
-parser.add_argument('--noise_dir', default='', type=str,
-                    help='Path to background noise data (augmentation)')
 parser.add_argument('--epochs', default=500, type=int, metavar='N',
                     help='number of total epochs to run')
-parser.add_argument('--resume', default='', type=str, metavar='PATH',
+parser.add_argument('--resume', default=None, type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
-parser.add_argument('--sr', default=22050, type=int,
-                    help='Sampling rate ')
-parser.add_argument('--ckp', default='sfnet_config0', type=str,
+parser.add_argument('--ckp', default='sfnet_config0_0', type=str,
                     help='checkpoint_name')
 parser.add_argument('--n_dummy_db', default=500, type=int)
 parser.add_argument('--n_query_db', default=20, type=int)
 
 
-def ntxent_loss(z_i, z_j, tau=0.05):
-    """
-    NTXent Loss function.
-    Parameters
-    ----------
-    z_i : torch.tensor
-        embedding of original samples (batch_size x emb_size)
-    z_j : torch.tensor
-        embedding of augmented samples (batch_size x emb_size)
-    Returns
-    -------
-    loss
-    """
-    z = torch.stack((z_i,z_j), dim=1).view(2*z_i.shape[0], z_i.shape[1])
-    a = torch.matmul(z, z.T)
-    a /= tau
-    Ls = []
-    for i in range(z.shape[0]):
-        nn_self = torch.cat([a[i,:i], a[i,i+1:]])
-        softmax = torch.nn.functional.log_softmax(nn_self, dim=0)
-        Ls.append(softmax[i if i%2 == 0 else i-1])
-    Ls = torch.stack(Ls)
-    
-    loss = torch.sum(Ls) / -z.shape[0]
-    return loss
 
-def train(train_loader, model, optimizer, ir_idx, noise_idx, sr, augment=None):
+def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, sr, augment=None):
     loss_epoch = 0
     # return loss_epoch
     if augment is None:
@@ -84,12 +55,13 @@ def train(train_loader, model, optimizer, ir_idx, noise_idx, sr, augment=None):
         optimizer.zero_grad()
         x_i = x_i.to(device)
         x_j = x_j.to(device)
-        x_i, x_j = augment(x_i, x_j)
+        with torch.no_grad():
+            x_i, x_j = augment(x_i, x_j)
         # print(f"Output from augmenter x_i, x_j {x_i.shape} {x_j.shape}")
 
         # positive pair, with encoding
         h_i, h_j, z_i, z_j = model(x_i, x_j)
-        loss = ntxent_loss(z_i, z_j)
+        loss = ntxent_loss(z_i, z_j, cfg)
         loss.backward()
         optimizer.step()
 
@@ -104,28 +76,33 @@ def train(train_loader, model, optimizer, ir_idx, noise_idx, sr, augment=None):
 
     return loss_epoch
 
-def validate(query_loader, dummy_loader, augment, model, output_root_dir):
-    create_dummy_db(dummy_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
-    create_fp_db(query_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
-    hit_rates = eval_faiss(emb_dir=output_root_dir, test_ids='all', n_centroids=64)
-    print("-------Validation hit-rates-------")
-    print(f'Top-1 exact hit rate = {hit_rates[0]}')
-    print(f'Top-1 near hit rate = {hit_rates[1]}')
+def validate(epoch, query_loader, dummy_loader, augment, model, output_root_dir):
+    if epoch % 10 == 0:
+        create_dummy_db(dummy_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
+        create_fp_db(query_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
+        hit_rates = eval_faiss(emb_dir=output_root_dir, test_ids='all', n_centroids=64)
+        print("-------Validation hit-rates-------")
+        print(f'Top-1 exact hit rate = {hit_rates[0]}')
+        print(f'Top-1 near hit rate = {hit_rates[1]}')
+    else:
+        hit_rates = None
     return hit_rates
 
 def main():
     args = parser.parse_args()
-    data_dir = args.data_dir
+    cfg = load_config(args.config)
+    writer = SummaryWriter(f'runs/{args.ckp}')
+    data_dir = override(cfg['train_dir'],args.data_dir)
     train_dir = os.path.join(data_dir, 'train')
     valid_dir = os.path.join(data_dir, 'valid')
-    ir_dir = args.ir_dir
-    noise_dir = args.noise_dir
+    ir_dir = cfg['ir_dir']
+    noise_dir = cfg['noise_dir']
     
     # Hyperparameters
-    batch_size = 120
-    learning_rate = 1e-4
+    batch_size = cfg['bsz_train']
+    learning_rate = cfg['lr']
     num_epochs = args.epochs
-    sample_rate = args.sr
+    sample_rate = cfg['fs']
     model_name = args.ckp
     random_seed = 42
     shuffle_dataset = True
@@ -141,9 +118,9 @@ def main():
     ir_train_idx = load_augmentation_index(ir_dir, splits=[0.6,0.2,0.2])["train"]
     noise_val_idx = load_augmentation_index(noise_dir, splits=[0.6,0.2,0.2])["validate"]
     ir_val_idx = load_augmentation_index(ir_dir, splits=[0.6,0.2,0.2])["validate"]
-    gpu_augment = GPUTransformNeuralfp(ir_dir=ir_train_idx, noise_dir=noise_train_idx, sample_rate=args.sr, train=True).to(device)
-    cpu_augment = GPUTransformNeuralfp(ir_dir=ir_train_idx, noise_dir=noise_train_idx, sample_rate=args.sr, cpu=True)
-    val_augment = GPUTransformNeuralfp(ir_dir=ir_val_idx, noise_dir=noise_val_idx, sample_rate=args.sr, train=False).to(device)
+    gpu_augment = GPUTransformNeuralfp(ir_dir=ir_train_idx, noise_dir=noise_train_idx, sample_rate=sample_rate, train=True).to(device)
+    cpu_augment = GPUTransformNeuralfp(ir_dir=ir_train_idx, noise_dir=noise_train_idx, sample_rate=sample_rate, cpu=True)
+    val_augment = GPUTransformNeuralfp(ir_dir=ir_val_idx, noise_dir=noise_val_idx, sample_rate=sample_rate, train=False).to(device)
 
     print("Loading dataset...")
     train_dataset = NeuralfpDataset(path=train_dir, train=True, transform=cpu_augment)
@@ -155,8 +132,9 @@ def main():
     print("Creating validation dataloaders...")
     dataset_size = len(valid_dataset)
     indices = list(range(dataset_size))
-    split1 = args.n_dummy_db
-    split2 = args.n_query_db
+    split1 = override(cfg['n_dummy'],args.n_dummy_db)
+    split2 = override(cfg['n_query'],args.n_query_db)
+    
     if shuffle_dataset :
         np.random.seed(random_seed)
         np.random.shuffle(indices)
@@ -181,9 +159,9 @@ def main():
 
     
     print("Creating new model...")
-    model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, layers=[1,1,1,1])).to(device)
+    model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 500, eta_min = 3e-5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = num_epochs, eta_min = 3e-5)
        
     if args.resume:
         if os.path.isfile(args.resume):
@@ -206,11 +184,16 @@ def main():
     model.train()
     for epoch in range(start_epoch+1, num_epochs+1):
         print("#######Epoch {}#######".format(epoch))
-        loss_epoch = train(train_loader, model, optimizer, ir_train_idx, noise_train_idx, args.sr, gpu_augment)
+        loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, sample_rate, gpu_augment)
+        writer.add_scalar("Loss/train", loss_epoch, epoch)
         loss_log.append(loss_epoch)
         output_root_dir = create_fp_dir(ckp=args.ckp, epoch=epoch)
-        hit_rates = validate(query_loader, dummy_loader, val_augment, model, output_root_dir)
-        hit_rate_log.append(hit_rates[0])
+        hit_rates = validate(epoch, query_loader, dummy_loader, val_augment, model, output_root_dir)
+        hit_rate_log.append(hit_rates[0] if hit_rates is not None else hit_rate_log[-1])
+        writer.add_scalar("Exact Hit_rate (2 sec)", hit_rates[0][0], epoch)
+        writer.add_scalar("Exact Hit_rate (4 sec)", hit_rates[0][1], epoch)
+        writer.add_scalar("Near Hit_rate (2 sec)", hit_rates[1][0], epoch)
+
         if loss_epoch < best_loss:
             best_loss = loss_epoch
             

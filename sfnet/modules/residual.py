@@ -76,12 +76,13 @@ class FuseFastToSlow(nn.Module):
     
 
 class SlowFastNetwork(nn.Module):
-    def __init__(self, block, layers, alpha=4, beta=8):
+    def __init__(self, block, cfg):
         super(SlowFastNetwork, self).__init__()
         self.slow_inplanes = 64
-        self.fast_inplanes = self.slow_inplanes / beta
-        self.alpha = alpha
-        self.beta = beta
+        self.alpha = cfg['alpha']
+        self.beta = cfg['beta']
+        self.layers = cfg['layers']
+        self.fast_inplanes = self.slow_inplanes / self.beta
         self.channels = [[64,64,256],[256,128,512],[512,256,1024],[1024,512,2048]] # [dim_in, dim_inner, dim_out]
         slow_channels = (torch.Tensor(self.channels) / 2).type(torch.int64).tolist()
         fast_channels = (torch.Tensor(slow_channels) / self.beta).type(torch.int64).tolist()
@@ -97,15 +98,15 @@ class SlowFastNetwork(nn.Module):
                 
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
 
-        self.slow_layer2 = self._make_layer(block, slow_channels[0], layers[0], temporal_conv=False, type="slow", strided=False)
-        self.slow_layer3 = self._make_layer(block, slow_channels[1], layers[1], temporal_conv=False, type="slow")
-        self.slow_layer4 = self._make_layer(block, slow_channels[2], layers[2], temporal_conv=True, type="slow")
-        self.slow_layer5 = self._make_layer(block, slow_channels[3], layers[3], temporal_conv=True, type="slow")
+        self.slow_layer2 = self._make_layer(block, slow_channels[0], self.layers[0], temporal_conv=False, type="slow", strided=False)
+        self.slow_layer3 = self._make_layer(block, slow_channels[1], self.layers[1], temporal_conv=False, type="slow")
+        self.slow_layer4 = self._make_layer(block, slow_channels[2], self.layers[2], temporal_conv=True, type="slow")
+        self.slow_layer5 = self._make_layer(block, slow_channels[3], self.layers[3], temporal_conv=True, type="slow")
 
-        self.fast_layer2 = self._make_layer(block, fast_channels[0], layers[0], temporal_conv=True, type="fast", strided=False)
-        self.fast_layer3 = self._make_layer(block, fast_channels[1], layers[1], temporal_conv=True, type="fast")
-        self.fast_layer4 = self._make_layer(block, fast_channels[2], layers[2], temporal_conv=True, type="fast")
-        self.fast_layer5 = self._make_layer(block, fast_channels[3], layers[3], temporal_conv=True, type="fast")
+        self.fast_layer2 = self._make_layer(block, fast_channels[0], self.layers[0], temporal_conv=True, type="fast", strided=False)
+        self.fast_layer3 = self._make_layer(block, fast_channels[1], self.layers[1], temporal_conv=True, type="fast")
+        self.fast_layer4 = self._make_layer(block, fast_channels[2], self.layers[2], temporal_conv=True, type="fast")
+        self.fast_layer5 = self._make_layer(block, fast_channels[3], self.layers[3], temporal_conv=True, type="fast")
 
         self.lateral_conv1 = FuseFastToSlow(dim_in=4, alpha=self.alpha) #correct
         self.lateral_conv2 = FuseFastToSlow(dim_in=16, alpha=self.alpha) #correct ?!
