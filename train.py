@@ -38,8 +38,8 @@ parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--ckp', default='sfnet_config0_0', type=str,
                     help='checkpoint_name')
-parser.add_argument('--n_dummy_db', default=500, type=int)
-parser.add_argument('--n_query_db', default=20, type=int)
+parser.add_argument('--n_dummy_db', default=None, type=int)
+parser.add_argument('--n_query_db', default=None, type=int)
 
 
 
