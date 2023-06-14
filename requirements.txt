@@ -5,3 +5,4 @@ torch-audiomentations
 soundfile
 faiss-gpu
 tensorboard
+PyYAML

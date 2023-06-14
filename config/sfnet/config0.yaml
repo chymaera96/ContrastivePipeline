@@ -1,9 +1,9 @@
 # Dataset directories
 data_dir: 'data/'
-train_dir: 'data/train/'
+train_dir: 'data/fma_medium/'
 val_dir: 'data/valid/'
-ir_dir: 'data/augmentation_datasets/ir_filters/'
-noise_dir: 'data/augmentation_datasets/noise/'
+ir_dir: 'data/aug/ir/'
+noise_dir: 'data/aug/noise/'
 
 # Model input parameters
 fs: 22050
@@ -17,6 +17,8 @@ n_fft: 740
 
 
 # Network hyperparameters
+train_sz: 10000
+val_sz: 500
 bsz_train: 120
 alpha: 4
 beta: 8

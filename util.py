@@ -7,7 +7,7 @@ import soundfile as sf
 import shutil
 import yaml
 
-def load_index(data_dir, ext=['wav','mp3']):
+def load_index(data_dir, ext=['wav','mp3'], max_len=10000):
     dataset = {}
 
     print(f"=>Loading indices from {data_dir}")
@@ -15,6 +15,8 @@ def load_index(data_dir, ext=['wav','mp3']):
     if not os.path.exists(json_path):
         idx = 0
         for fpath in glob.iglob(os.path.join(data_dir,'**/*.*'), recursive=True):
+            if len(dataset) >= max_len:
+                break
             if fpath.split('.')[-1] in ext: 
                 dataset[str(idx)] = fpath
                 idx += 1
