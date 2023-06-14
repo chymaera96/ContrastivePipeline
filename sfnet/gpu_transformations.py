@@ -6,7 +6,7 @@ import warnings
 
 class GPUTransformNeuralfp(nn.Module):
     
-    def __init__(self, ir_dir, noise_dir, cfg, train=True, cpu=False):
+    def __init__(self, cfg, ir_dir, noise_dir, train=True, cpu=False):
         super(GPUTransformNeuralfp, self).__init__()
         self.sample_rate = cfg['fs']
         self.ir_dir = ir_dir

@@ -43,23 +43,19 @@ parser.add_argument('--n_query_db', default=None, type=int)
 
 
 
-def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, sr, augment=None):
+def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, augment=None):
     loss_epoch = 0
     # return loss_epoch
-    if augment is None:
-        augment = GPUTransformNeuralfp(ir_dir=ir_idx, noise_dir=noise_idx, sample_rate=sr).to(device)
+    # if augment is None:
+    #     augment = GPUTransformNeuralfp(ir_dir=ir_idx, noise_dir=noise_idx, sample_rate=sr).to(device)
 
     for idx, (x_i, x_j) in enumerate(train_loader):
 
-        # print(f"Inside train function x_i, x_j {x_i.shape} {x_j.shape}")
         optimizer.zero_grad()
         x_i = x_i.to(device)
         x_j = x_j.to(device)
         with torch.no_grad():
             x_i, x_j = augment(x_i, x_j)
-        # print(f"Output from augmenter x_i, x_j {x_i.shape} {x_j.shape}")
-
-        # positive pair, with encoding
         h_i, h_j, z_i, z_j = model(x_i, x_j)
         loss = ntxent_loss(z_i, z_j, cfg)
         loss.backward()
@@ -68,11 +64,7 @@ def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, sr, augment=No
         if idx % 10 == 0:
             print(f"Step [{idx}/{len(train_loader)}]\t Loss: {loss.item()}")
 
-
         loss_epoch += loss.item()
-        # del augment
-        # gc.collect()
-        # torch.cuda.empty_cache()
 
     return loss_epoch
 
@@ -102,7 +94,6 @@ def main():
     batch_size = cfg['bsz_train']
     learning_rate = cfg['lr']
     num_epochs = args.epochs
-    sample_rate = cfg['fs']
     model_name = args.ckp
     random_seed = 42
     shuffle_dataset = True
@@ -118,9 +109,9 @@ def main():
     ir_train_idx = load_augmentation_index(ir_dir, splits=[0.6,0.2,0.2])["train"]
     noise_val_idx = load_augmentation_index(noise_dir, splits=[0.6,0.2,0.2])["validate"]
     ir_val_idx = load_augmentation_index(ir_dir, splits=[0.6,0.2,0.2])["validate"]
-    gpu_augment = GPUTransformNeuralfp(ir_dir=ir_train_idx, noise_dir=noise_train_idx, sample_rate=sample_rate, train=True).to(device)
-    cpu_augment = GPUTransformNeuralfp(ir_dir=ir_train_idx, noise_dir=noise_train_idx, sample_rate=sample_rate, cpu=True)
-    val_augment = GPUTransformNeuralfp(ir_dir=ir_val_idx, noise_dir=noise_val_idx, sample_rate=sample_rate, train=False).to(device)
+    gpu_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_train_idx, noise_dir=noise_train_idx, train=True).to(device)
+    cpu_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_train_idx, noise_dir=noise_train_idx, cpu=True)
+    val_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_val_idx, noise_dir=noise_val_idx, train=False).to(device)
 
     print("Loading dataset...")
     train_dataset = NeuralfpDataset(path=train_dir, train=True, transform=cpu_augment)
@@ -184,7 +175,7 @@ def main():
     model.train()
     for epoch in range(start_epoch+1, num_epochs+1):
         print("#######Epoch {}#######".format(epoch))
-        loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, sample_rate, gpu_augment)
+        loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, gpu_augment)
         writer.add_scalar("Loss/train", loss_epoch, epoch)
         loss_log.append(loss_epoch)
         output_root_dir = create_fp_dir(ckp=args.ckp, epoch=epoch)
