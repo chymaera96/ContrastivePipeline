@@ -20,9 +20,7 @@ from test_fp import create_fp_db, create_dummy_db
 # Directories
 root = os.path.dirname(__file__)
 model_folder = os.path.join(root,"checkpoint")
-# data_dir = os.path.join(root,"data/fma_8000")
-# ir_dir = os.path.join(root,'data/augmentation_datasets/ir_filters')
-# noise_dir = os.path.join(root,'data/augmentation_datasets/noise')
+
 
 device = torch.device("cuda")
 
@@ -30,6 +28,8 @@ device = torch.device("cuda")
 parser = argparse.ArgumentParser(description='Neuralfp Training')
 parser.add_argument('--config', default=None, type=str,
                     help='Path to training data')
+parser.add_argument('--data_dir', default=None, type=str, metavar='PATH',
+                    help='path to data directory')
 parser.add_argument('--epochs', default=500, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH',
@@ -93,8 +93,8 @@ def main():
     cfg = load_config(args.config)
     writer = SummaryWriter(f'runs/{args.ckp}')
     data_dir = override(cfg['train_dir'],args.data_dir)
-    train_dir = os.path.join(data_dir, 'train')
-    valid_dir = os.path.join(data_dir, 'valid')
+    train_dir = cfg['train_dir']
+    valid_dir = cfg['val_dir']
     ir_dir = cfg['ir_dir']
     noise_dir = cfg['noise_dir']
     
