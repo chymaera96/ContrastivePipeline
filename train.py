@@ -98,8 +98,8 @@ def main():
     random_seed = 42
     shuffle_dataset = True
 
-    print(f"Size of train index file {len(load_index(train_dir))}")
-    print(f"Size of validation index file {len(load_index(valid_dir))}")
+    # print(f"Size of train index file {len(load_index(train_dir))}")
+    # print(f"Size of validation index file {len(load_index(valid_dir))}")
 
 
     # assert data_dir == os.path.join(root,"data/fma_8000")

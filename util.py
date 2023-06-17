@@ -25,6 +25,7 @@ def load_index(data_dir, ext=['wav','mp3'], max_len=10000):
             json.dump(dataset, fp)
     
     else:
+        print(f"Index exists. Loading indices from {json_path}")
         with open(json_path, 'r') as fp:
             dataset = json.load(fp)
 
