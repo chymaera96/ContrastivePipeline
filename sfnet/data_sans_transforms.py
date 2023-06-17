@@ -14,7 +14,7 @@ from util import load_index, get_frames, qtile_normalize
 
 
 class NeuralfpDataset(Dataset):
-    def __init__(self, path, cfg, transform=None, train=False):
+    def __init__(self, cfg, path, transform=None, train=False):
         self.path = path
         self.transform = transform
         self.train = train

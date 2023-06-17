@@ -114,12 +114,12 @@ def main():
     val_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_val_idx, noise_dir=noise_val_idx, train=False).to(device)
 
     print("Loading dataset...")
-    train_dataset = NeuralfpDataset(path=train_dir, train=True, transform=cpu_augment)
+    train_dataset = NeuralfpDataset(cfg=cfg, path=train_dir, train=True, transform=cpu_augment)
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True,
         num_workers=8, pin_memory=True, drop_last=True)
     
-    valid_dataset = NeuralfpDataset(path=valid_dir, train=False)
+    valid_dataset = NeuralfpDataset(cfg=cfg, path=valid_dir, train=False)
     print("Creating validation dataloaders...")
     dataset_size = len(valid_dataset)
     indices = list(range(dataset_size))
