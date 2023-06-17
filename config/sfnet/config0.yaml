@@ -16,7 +16,7 @@ n_mels: 128
 n_fft: 740
 
 
-# Network hyperparameters
+# Model hyperparameters
 train_sz: 10000
 val_sz: 500
 bsz_train: 120
