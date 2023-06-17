@@ -1,0 +1,8 @@
+cp_sfnet_venv
+*.pyc
+*.wav
+*.mp3
+data
+runs
+logs
+checkpoint
