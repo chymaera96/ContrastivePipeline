@@ -181,9 +181,10 @@ def main():
         output_root_dir = create_fp_dir(ckp=args.ckp, epoch=epoch)
         hit_rates = validate(epoch, query_loader, dummy_loader, val_augment, model, output_root_dir)
         hit_rate_log.append(hit_rates[0] if hit_rates is not None else hit_rate_log[-1])
-        writer.add_scalar("Exact Hit_rate (2 sec)", hit_rates[0][0], epoch)
-        writer.add_scalar("Exact Hit_rate (4 sec)", hit_rates[0][1], epoch)
-        writer.add_scalar("Near Hit_rate (2 sec)", hit_rates[1][0], epoch)
+        if hit_rates is not None:
+            writer.add_scalar("Exact Hit_rate (2 sec)", hit_rates[0][0], epoch)
+            writer.add_scalar("Exact Hit_rate (4 sec)", hit_rates[0][1], epoch)
+            writer.add_scalar("Near Hit_rate (2 sec)", hit_rates[1][0], epoch)
 
         if loss_epoch < best_loss:
             best_loss = loss_epoch
