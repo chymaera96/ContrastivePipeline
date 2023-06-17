@@ -53,6 +53,9 @@ def load_augmentation_index(data_dir, splits, ext=['wav','mp3'], shuffle_dataset
         
         dataset['train'] = [fpaths[ix] for ix in train_idxs]
         dataset['test'] = [fpaths[ix] for ix in test_idxs]
+
+        with open(json_path, 'w') as fp:
+            json.dump(dataset, fp)
     
     else:
         with open(json_path, 'r') as fp:
