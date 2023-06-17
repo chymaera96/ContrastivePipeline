@@ -16,10 +16,10 @@ n_mels: 128
 n_fft: 740
 
 
-# Model hyperparameters
+# Dataset and Model hyperparameters
 train_sz: 10000
 val_sz: 500
-bsz_train: 120
+bsz_train: 128
 alpha: 4
 beta: 8
 layers: [1, 1, 1, 1]
