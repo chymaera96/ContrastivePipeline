@@ -84,7 +84,7 @@ def main():
     args = parser.parse_args()
     cfg = load_config(args.config)
     writer = SummaryWriter(f'runs/{args.ckp}')
-    data_dir = override(cfg['train_dir'],args.data_dir)
+    data_dir = override(cfg['data_dir'],args.data_dir)
     train_dir = cfg['train_dir']
     valid_dir = cfg['val_dir']
     ir_dir = cfg['ir_dir']
