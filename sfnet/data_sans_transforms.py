@@ -6,7 +6,6 @@ import torch.nn.functional as F
 import torchaudio
 import numpy as np
 import librosa
-import warnings
 import torch.nn as nn
 import warnings
 
@@ -35,11 +34,12 @@ class NeuralfpDataset(Dataset):
         
         datapath = self.filenames[str(idx)]
         try:
-            audio, sr = torchaudio.load(datapath)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                audio, sr = torchaudio.load(datapath)
 
         except Exception:
-
-            print("Error loading:" + self.filenames[str(idx)])
+            # print("Error loading:" + self.filenames[str(idx)])
             self.ignore_idx.append(idx)
             return self[idx+1]
 
