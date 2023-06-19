@@ -44,6 +44,7 @@ parser.add_argument('--n_query_db', default=None, type=int)
 
 
 def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, augment=None):
+    model.train()
     loss_epoch = 0
     # return loss_epoch
     # if augment is None:
@@ -69,6 +70,7 @@ def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, augment=None):
     return loss_epoch
 
 def validate(epoch, query_loader, dummy_loader, augment, model, output_root_dir):
+    model.eval()
     if epoch==1 or epoch % 10 == 0:
         create_dummy_db(dummy_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
         create_fp_db(query_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
@@ -172,7 +174,6 @@ def main():
     print("Calculating initial loss ...")
     best_loss = float('inf')
     # training
-    model.train()
     for epoch in range(start_epoch+1, num_epochs+1):
         print("#######Epoch {}#######".format(epoch))
         loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, gpu_augment)
