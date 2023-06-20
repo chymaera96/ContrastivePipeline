@@ -30,7 +30,7 @@ parser.add_argument('--config', default=None, type=str,
                     help='Path to training data')
 parser.add_argument('--data_dir', default=None, type=str, metavar='PATH',
                     help='path to data directory')
-parser.add_argument('--epochs', default=500, type=int, metavar='N',
+parser.add_argument('--epochs', default=None, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
@@ -95,7 +95,7 @@ def main():
     # Hyperparameters
     batch_size = cfg['bsz_train']
     learning_rate = cfg['lr']
-    num_epochs = args.epochs
+    num_epochs = override(cfg['n_epochs'], args.epochs)
     model_name = args.ckp
     random_seed = 42
     shuffle_dataset = True
@@ -154,7 +154,7 @@ def main():
     print("Creating new model...")
     model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = num_epochs, eta_min = 3e-5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = 1e-7)
        
     if args.resume:
         if os.path.isfile(args.resume):
