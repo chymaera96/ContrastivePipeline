@@ -173,6 +173,7 @@ def main():
 
     print("Calculating initial loss ...")
     best_loss = float('inf')
+    best_hr = 0
     # training
     for epoch in range(start_epoch+1, num_epochs+1):
         print("#######Epoch {}#######".format(epoch))
@@ -189,7 +190,6 @@ def main():
 
         if loss_epoch < best_loss:
             best_loss = loss_epoch
-            
             checkpoint = {
                 'epoch': epoch,
                 'loss': loss_log,
@@ -200,6 +200,20 @@ def main():
                 'scheduler': scheduler.state_dict()
             }
             save_ckp(checkpoint,epoch, model_name, model_folder)
+
+        elif hit_rates is not None and hit_rates[0][0] > best_hr:
+            best_hr = hit_rates[0][0]
+            checkpoint = {
+                'epoch': epoch,
+                'loss': loss_log,
+                'valid_acc' : hit_rate_log,
+                'hit_rate': hit_rates,
+                'state_dict': model.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'scheduler': scheduler.state_dict()
+            }
+            save_ckp(checkpoint,epoch, model_name, model_folder)
+            
         scheduler.step()
     
   
