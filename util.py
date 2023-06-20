@@ -152,8 +152,11 @@ def preprocess_aug_set_sr(data_dir, sr=22050):
 
 
 def main():
-    data_dir = 'data/augmentation_datasets/ir_filters'
-    preprocess_aug_set_sr(data_dir)
+    # delete checkpoints for epochs under 100
+    for fpath in glob.iglob(os.path.join('checkpoint','*.pth'), recursive=True):
+        epoch = int(fpath.split('/')[-1].split('_')[-1].split('.')[0])
+        if epoch <= 100:
+            os.remove(fpath)
 
 
 if __name__ == '__main__':
