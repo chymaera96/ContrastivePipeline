@@ -53,6 +53,7 @@ class GPUTransformNeuralfp(nn.Module):
 
         if self.train:
             X_i = self.logmelspec(x_i)
+            print(f"Shape of X_i: {X_i.shape}")
             X_i = self.spec_aug(X_i)
             X_i = F.pad(X_i, (self.n_frames - X_i.size(-1), 0))
 
