@@ -53,10 +53,8 @@ class GPUTransformNeuralfp(nn.Module):
 
         if self.train:
             X_i = self.logmelspec(x_i)
-            print(f"Shape of X_i: {X_i.shape}")
             X_i = self.spec_aug(X_i)
             X_i = F.pad(X_i, (self.n_frames - X_i.size(-1), 0))
-            print(f"Shape of X_i after padding: {X_i.shape}")
 
             # x_j = self.gpu_transform(x_j, sample_rate=self.sample_rate)
             X_j = self.logmelspec(x_j)
@@ -64,15 +62,16 @@ class GPUTransformNeuralfp(nn.Module):
             X_j = F.pad(X_j, (self.n_frames - X_j.size(-1), 0)) 
 
 
-            return X_i.permute(0,1,3,2), X_j.permute(0,1,3,2)
         
         else:
             X_i = self.logmelspec(x_i.squeeze(0)).permute(2,0,1)
-            X_i = X_i.unfold(0, size=self.n_frames, step=self.n_frames//2).permute(0,1,3,2)
+            X_i = X_i.unfold(0, size=self.n_frames, step=self.n_frames//2)
 
             x_j = self.val_transform(x_j, sample_rate=self.sample_rate)
             X_j = self.logmelspec(x_j.squeeze(0)).permute(2,0,1)
-            X_j = X_j.unfold(0, size=self.n_frames, step=self.n_frames//2).permute(0,1,3,2)
+            X_j = X_j.unfold(0, size=self.n_frames, step=self.n_frames//2)
 
-            
+        if self.n_frames == 240:    # sfnet has transposed shape   
+            return X_i.permute(0,1,3,2), X_j.permute(0,1,3,2)
+        else:
             return X_i, X_j
