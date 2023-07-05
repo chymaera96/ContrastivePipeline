@@ -14,17 +14,17 @@ class GPUTransformNeuralfp(nn.Module):
         self.n_frames = cfg['n_frames']
         self.train = train
         self.cpu = cpu
-        self.gpu_transform = Compose([
-            # ApplyImpulseResponse(ir_paths=self.ir_dir, p=0.5),
-            AddBackgroundNoise(background_paths=self.noise_dir, 
-                               min_snr_in_db=cfg['tr_snr'][0], 
-                               max_snr_in_db=cfg['tr_snr'][1], 
-                               p=1),            
-            ])
+        # self.gpu_transform = Compose([
+        #     # ApplyImpulseResponse(ir_paths=self.ir_dir, p=0.5),
+        #     AddBackgroundNoise(background_paths=self.noise_dir, 
+        #                        min_snr_in_db=cfg['tr_snr'][0], 
+        #                        max_snr_in_db=cfg['tr_snr'][1], 
+        #                        p=1),            
+        #     ])
         
         self.cpu_transform = Compose([
             ApplyImpulseResponse(ir_paths=self.ir_dir, p=0.5),
-            # AddBackgroundNoise(background_paths=noise_dir, min_snr_in_db=0, max_snr_in_db=10,p=0.8),
+            AddBackgroundNoise(background_paths=noise_dir, min_snr_in_db=0, max_snr_in_db=10,p=0.5),
             ])
         
         self.val_transform = Compose([
@@ -56,7 +56,7 @@ class GPUTransformNeuralfp(nn.Module):
             X_i = self.spec_aug(X_i)
             X_i = F.pad(X_i, (self.n_frames - X_i.size(-1), 0))
 
-            x_j = self.gpu_transform(x_j, sample_rate=self.sample_rate)
+            # x_j = self.gpu_transform(x_j, sample_rate=self.sample_rate)
             X_j = self.logmelspec(x_j)
             X_j = self.spec_aug(X_j)
             X_j = F.pad(X_j, (self.n_frames - X_j.size(-1), 0)) 
