@@ -20,11 +20,11 @@ class Neuralfp(nn.Module):
     def forward(self, x_i, x_j):
         
         h_i = self.encoder(x_i)
-        z_i = self.projector(h_i.unsqueeze(-1))
+        z_i = self.projector(h_i.unsqueeze(-1)).squeeze(-1)
         z_i = F.normalize(z_i, p=2)
 
         h_j = self.encoder(x_j)
-        z_j = self.projector(h_j.unsqueeze(-1))
+        z_j = self.projector(h_j.unsqueeze(-1)).squeeze(-1)
         z_j = F.normalize(z_j, p=2)
 
         return h_i, h_j, z_i, z_j
