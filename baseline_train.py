@@ -49,7 +49,7 @@ parser.add_argument('--n_query_db', default=None, type=int)
 def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, augment=None):
     model.train()
     loss_epoch = 0
-    # return loss_epoch
+    return loss_epoch
     # if augment is None:
     #     augment = GPUTransformNeuralfp(ir_dir=ir_idx, noise_dir=noise_idx, sample_rate=sr).to(device)
 
