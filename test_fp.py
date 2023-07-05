@@ -51,7 +51,7 @@ def create_fp_db(dataloader, augment, model, output_root_dir, verbose=True):
         with torch.no_grad():
             _, _, z_i, z_j= model(x_i,x_j)        
 
-        print(f'Shape of z_i {z_i.shape} inside the create_fp_db function')
+        # print(f'Shape of z_i {z_i.shape} inside the create_fp_db function')
         fp_db.append(z_i.detach().cpu().numpy())
         fp_q.append(z_j.detach().cpu().numpy())
 
@@ -93,7 +93,7 @@ def create_dummy_db(dataloader, augment, model, output_root_dir, fname='dummy_db
         with torch.no_grad():
             _, _, z_i, _= model(x_i,x_i)  
 
-        print(f'Shape of z_i {z_i.shape} inside the create_dummy_db function')
+        # print(f'Shape of z_i {z_i.shape} inside the create_dummy_db function')
         fp.append(z_i.detach().cpu().numpy())
         
         if verbose and idx % 10 == 0:
