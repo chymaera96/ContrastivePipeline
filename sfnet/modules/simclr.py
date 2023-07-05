@@ -29,4 +29,7 @@ class SimCLR(nn.Module):
         z_j = self.projector(new_h_j).squeeze(-1)
         z_j = F.normalize(z_j, p=2)
 
+        print(f'Shape of z_i {z_i.shape} inside the SimCLR forward function')
+
+
         return h_i, h_j, z_i, z_j
