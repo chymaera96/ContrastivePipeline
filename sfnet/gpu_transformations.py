@@ -56,6 +56,7 @@ class GPUTransformNeuralfp(nn.Module):
             print(f"Shape of X_i: {X_i.shape}")
             X_i = self.spec_aug(X_i)
             X_i = F.pad(X_i, (self.n_frames - X_i.size(-1), 0))
+            print(f"Shape of X_i after padding: {X_i.shape}")
 
             # x_j = self.gpu_transform(x_j, sample_rate=self.sample_rate)
             X_j = self.logmelspec(x_j)
