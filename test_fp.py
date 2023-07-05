@@ -91,8 +91,9 @@ def create_dummy_db(dataloader, augment, model, output_root_dir, fname='dummy_db
         x_i, _ = augment(audio, audio)
         # x_i = torch.unsqueeze(db[0],1)
         with torch.no_grad():
-            _, _, z_i, _= model(x_i,x_i)        
+            _, _, z_i, _= model(x_i,x_i)  
 
+        print(f'Shape of z_i {z_i.shape} inside the create_dummy_db function')
         fp.append(z_i.detach().cpu().numpy())
         
         if verbose and idx % 10 == 0:
