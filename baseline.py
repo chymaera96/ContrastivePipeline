@@ -14,6 +14,8 @@ from sfnet.gpu_transformations import GPUTransformNeuralfp
 from sfnet.data_sans_transforms import NeuralfpDataset
 from sfnet.modules.simclr import SimCLR
 from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
+from baseline.encoder import Encoder
+from baseline.neuralfp import Neuralfp
 from eval import eval_faiss
 from test_fp import create_fp_db, create_dummy_db
 
@@ -34,10 +36,11 @@ parser.add_argument('--epochs', default=None, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
-parser.add_argument('--seed', default=None, type=int,
+parser.add_argument('--seed', default=42, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--ckp', default='sfnet_config0_0', type=str,
                     help='checkpoint_name')
+parser.add_argument('--encoder', default='sfnet', type=str)
 parser.add_argument('--n_dummy_db', default=None, type=int)
 parser.add_argument('--n_query_db', default=None, type=int)
 
@@ -97,7 +100,7 @@ def main():
     learning_rate = cfg['lr']
     num_epochs = override(cfg['n_epochs'], args.epochs)
     model_name = args.ckp
-    random_seed = 42
+    random_seed = args.seed
     shuffle_dataset = True
 
     # print(f"Size of train index file {len(load_index(train_dir))}")
@@ -152,7 +155,10 @@ def main():
 
     
     print("Creating new model...")
-    model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
+    if args.encoder == 'baseline':
+        model = Neuralfp(encoder=Encoder()).to(device)
+    elif args.encoder == 'sfnet':
+        model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = 1e-7)
        

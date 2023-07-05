@@ -6,14 +6,14 @@ ir_dir: 'data/aug/ir'
 noise_dir: 'data/aug/noise'
 
 # Model input parameters
-fs: 22050
-dur: 2.0
+fs: 8000
+dur: 1.0
 offset: 0.2
 norm: 0.95
-win_len: 740
-hop_len: 185
-n_mels: 128
-n_fft: 740
+win_len: 1024
+hop_len: 256
+n_mels: 256
+n_fft: 1024
 
 
 # Dataset and Model hyperparameters
@@ -29,7 +29,7 @@ n_epochs: 150
 T_max: 150
 
 # Augmentation hyperparameters
-n_frames: 240 # depends on the spectrogram parameters
+n_frames: 32 # depends on the spectrogram parameters
 tr_snr: [0, 10]
 val_snr: [0, 10]
 test_snr: [0, 10]
@@ -40,7 +40,3 @@ freq_mask: 64
 # Database sizes (validation)
 n_dummy: 100
 n_query: 20
-
-
-  
-
