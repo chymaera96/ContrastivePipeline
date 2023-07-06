@@ -23,7 +23,7 @@ class GPUTransformNeuralfp(nn.Module):
         #     ])
         
         self.cpu_transform = Compose([
-            ApplyImpulseResponse(ir_paths=self.ir_dir, p=1),
+            ApplyImpulseResponse(ir_paths=self.ir_dir, p=0.8),
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['tr_snr'][0],
                                max_snr_in_db=cfg['tr_snr'][1], 
@@ -35,7 +35,7 @@ class GPUTransformNeuralfp(nn.Module):
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['val_snr'][0], 
                                max_snr_in_db=cfg['val_snr'][1], 
-                               p=1),
+                               p=0.8),
             ])
         
         self.logmelspec = nn.Sequential(
