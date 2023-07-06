@@ -27,7 +27,7 @@ class GPUTransformNeuralfp(nn.Module):
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['tr_snr'][0],
                                max_snr_in_db=cfg['tr_snr'][1], 
-                               p=1),
+                               p=0.8),
             ])
         
         self.val_transform = Compose([
@@ -35,7 +35,7 @@ class GPUTransformNeuralfp(nn.Module):
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['val_snr'][0], 
                                max_snr_in_db=cfg['val_snr'][1], 
-                               p=0.8),
+                               p=1),
             ])
         
         self.logmelspec = nn.Sequential(
