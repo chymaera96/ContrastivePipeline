@@ -160,7 +160,7 @@ def main():
     elif args.encoder == 'sfnet':
         model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = 1e-7)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = 1e-6)
        
     if args.resume:
         if os.path.isfile(args.resume):
