@@ -80,11 +80,11 @@ def load_ckp(checkpoint_fpath, model, optimizer, scheduler):
     scheduler.load_state_dict(checkpoint['scheduler'])
     return model, optimizer, scheduler, checkpoint['epoch'], checkpoint['loss'], checkpoint['valid_acc']
 
-def save_ckp(state,epoch,model_name,model_folder):
+def save_ckp(state,model_name,model_folder,text):
     if not os.path.exists(model_folder): 
         print("Creating checkpoint directory...")
         os.mkdir(model_folder)
-    torch.save(state, "{}/model_{}_epoch_{}.pth".format(model_folder, model_name, epoch))
+    torch.save(state, "{}/model_{}_{}.pth".format(model_folder, model_name, text))
 
 def load_config(config_path):
     with open(config_path, 'r') as fp:
