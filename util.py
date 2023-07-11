@@ -48,7 +48,7 @@ def load_augmentation_index(data_dir, splits, ext=['wav','mp3'], shuffle_dataset
             train_idxs, valid_idxs, test_idxs = indices[:splits[0]], indices[splits[0]: splits[0] + splits[1]], indices[splits[1]:]
             dataset['validate'] = [fpaths[ix] for ix in valid_idxs]
         else:
-            splits = splits*dataset_size
+            splits = int(splits*dataset_size)
             train_idxs, test_idxs = indices[:splits], indices[splits:]
         
         dataset['train'] = [fpaths[ix] for ix in train_idxs]
