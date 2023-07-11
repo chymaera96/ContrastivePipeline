@@ -1,5 +1,5 @@
 torch
-torchaudio
+torchaudio==1.9.0
 librosa
 torch-audiomentations
 soundfile
