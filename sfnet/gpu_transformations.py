@@ -23,11 +23,11 @@ class GPUTransformNeuralfp(nn.Module):
         #     ])
         
         self.cpu_transform = Compose([
-            ApplyImpulseResponse(ir_paths=self.ir_dir, p=0.5),
+            ApplyImpulseResponse(ir_paths=self.ir_dir, p=1),
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['tr_snr'][0],
                                max_snr_in_db=cfg['tr_snr'][1], 
-                               p=0.5),
+                               p=0.01),
             ])
         
         self.val_transform = Compose([
