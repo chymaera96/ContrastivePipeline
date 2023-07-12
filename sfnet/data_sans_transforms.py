@@ -55,20 +55,28 @@ class NeuralfpDataset(Dataset):
             self.ignore_idx.append(idx)
             return self[idx + 1]
         
+
+        
         #   For training pipeline, output a random frame of the audio
         if self.train:
+            a_i = audio_resampled
+            a_j = a_i.clone()
+            if self.transform is not None:
+                a_i, a_j = self.transform(a_i, a_j)
+
             offset_mod = int(self.sample_rate*(self.offset) + clip_frames)
             if len(audio_resampled) < offset_mod:
                 print(len(audio_resampled), offset_mod)
             r = np.random.randint(0,len(audio_resampled)-offset_mod)
             ri = np.random.randint(0,offset_mod - clip_frames)
             rj = np.random.randint(0,offset_mod - clip_frames)
-            clip = audio_resampled[r:r+offset_mod]
-            x_i = clip[ri:ri+clip_frames]
-            x_j = clip[rj:rj+clip_frames]
+            clip_i = a_i[r:r+offset_mod]
+            clip_j = a_j[r:r+offset_mod]
+            x_i = clip_i[ri:ri+clip_frames]
+            x_j = clip_j[rj:rj+clip_frames]
 
-            if self.transform is not None:
-                x_i, x_j = self.transform(x_i, x_j)
+            # if self.transform is not None:
+            #     x_i, x_j = self.transform(x_i, x_j)
 
             return torch.unsqueeze(x_i, 0), torch.unsqueeze(x_j, 0)
         
