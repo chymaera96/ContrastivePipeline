@@ -74,15 +74,15 @@ def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, augment=None):
 
 def validate(epoch, query_loader, dummy_loader, augment, model, output_root_dir):
     model.eval()
-    # if epoch==1 or epoch % 10 == 0:
-    create_dummy_db(dummy_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
-    create_fp_db(query_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
-    hit_rates = eval_faiss(emb_dir=output_root_dir, test_ids='all', index_type='l2', n_centroids=64)
-    print("-------Validation hit-rates-------")
-    print(f'Top-1 exact hit rate = {hit_rates[0]}')
-    print(f'Top-1 near hit rate = {hit_rates[1]}')
-    # else:
-    #     hit_rates = None
+    if epoch==1 or epoch % 10 == 0:
+        create_dummy_db(dummy_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
+        create_fp_db(query_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
+        hit_rates = eval_faiss(emb_dir=output_root_dir, test_ids='all', index_type='l2', n_centroids=64)
+        print("-------Validation hit-rates-------")
+        print(f'Top-1 exact hit rate = {hit_rates[0]}')
+        print(f'Top-1 near hit rate = {hit_rates[1]}')
+    else:
+        hit_rates = None
     return hit_rates
 
 def main():
@@ -181,49 +181,48 @@ def main():
     best_loss = float('inf')
     best_hr = 0
     # training
-    hit_rates = validate(start_epoch, query_loader, dummy_loader, val_augment, model, output_root_dir)
 
-    # for epoch in range(start_epoch+1, num_epochs+1):
-    #     print("#######Epoch {}#######".format(epoch))
-    #     loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, gpu_augment)
-    #     writer.add_scalar("Loss/train", loss_epoch, epoch)
-    #     loss_log.append(loss_epoch)
-    #     output_root_dir = create_fp_dir(ckp=args.ckp, epoch=epoch)
-    #     hit_rates = validate(epoch, query_loader, dummy_loader, val_augment, model, output_root_dir)
-    #     hit_rate_log.append(hit_rates[0] if hit_rates is not None else hit_rate_log[-1])
-    #     if hit_rates is not None:
-    #         writer.add_scalar("Exact Hit_rate (2 sec)", hit_rates[0][0], epoch)
-    #         writer.add_scalar("Exact Hit_rate (4 sec)", hit_rates[0][1], epoch)
-    #         writer.add_scalar("Near Hit_rate (2 sec)", hit_rates[1][0], epoch)
+    for epoch in range(start_epoch+1, num_epochs+1):
+        print("#######Epoch {}#######".format(epoch))
+        loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, gpu_augment)
+        writer.add_scalar("Loss/train", loss_epoch, epoch)
+        loss_log.append(loss_epoch)
+        output_root_dir = create_fp_dir(ckp=args.ckp, epoch=epoch)
+        hit_rates = validate(epoch, query_loader, dummy_loader, val_augment, model, output_root_dir)
+        hit_rate_log.append(hit_rates[0] if hit_rates is not None else hit_rate_log[-1])
+        if hit_rates is not None:
+            writer.add_scalar("Exact Hit_rate (2 sec)", hit_rates[0][0], epoch)
+            writer.add_scalar("Exact Hit_rate (4 sec)", hit_rates[0][1], epoch)
+            writer.add_scalar("Near Hit_rate (2 sec)", hit_rates[1][0], epoch)
 
-    #     checkpoint = {
-    #         'epoch': epoch,
-    #         'loss': loss_log,
-    #         'valid_acc' : hit_rate_log,
-    #         'hit_rate': hit_rates,
-    #         'state_dict': model.state_dict(),
-    #         'optimizer': optimizer.state_dict(),
-    #         'scheduler': scheduler.state_dict()
-    #     }
-    #     save_ckp(checkpoint, model_name, model_folder, 'current')
-    #     if loss_epoch < best_loss:
-    #         best_loss = loss_epoch
-    #         save_ckp(checkpoint, model_name, model_folder, 'best')
+        checkpoint = {
+            'epoch': epoch,
+            'loss': loss_log,
+            'valid_acc' : hit_rate_log,
+            'hit_rate': hit_rates,
+            'state_dict': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'scheduler': scheduler.state_dict()
+        }
+        save_ckp(checkpoint, model_name, model_folder, 'current')
+        if loss_epoch < best_loss:
+            best_loss = loss_epoch
+            save_ckp(checkpoint, model_name, model_folder, 'best')
 
-    #     # elif hit_rates is not None and hit_rates[0][0] > best_hr:
-    #     #     best_hr = hit_rates[0][0]
-    #     #     checkpoint = {
-    #     #         'epoch': epoch,
-    #     #         'loss': loss_log,
-    #     #         'valid_acc' : hit_rate_log,
-    #     #         'hit_rate': hit_rates,
-    #     #         'state_dict': model.state_dict(),
-    #     #         'optimizer': optimizer.state_dict(),
-    #     #         'scheduler': scheduler.state_dict()
-    #     #     }
-    #     #     save_ckp(checkpoint,epoch, model_name, model_folder)
+        # elif hit_rates is not None and hit_rates[0][0] > best_hr:
+        #     best_hr = hit_rates[0][0]
+        #     checkpoint = {
+        #         'epoch': epoch,
+        #         'loss': loss_log,
+        #         'valid_acc' : hit_rate_log,
+        #         'hit_rate': hit_rates,
+        #         'state_dict': model.state_dict(),
+        #         'optimizer': optimizer.state_dict(),
+        #         'scheduler': scheduler.state_dict()
+        #     }
+        #     save_ckp(checkpoint,epoch, model_name, model_folder)
             
-    #     scheduler.step()
+        scheduler.step()
     
   
         
