@@ -24,7 +24,7 @@ alpha: 4
 beta: 8
 layers: [1, 1, 1, 1]
 tau: 0.05
-lr: 1.0e-4
+lr: 5.0e-5
 n_epochs: 120
 T_max: 120
 
