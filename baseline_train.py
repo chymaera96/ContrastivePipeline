@@ -30,15 +30,17 @@ device = torch.device("cuda")
 parser = argparse.ArgumentParser(description='Neuralfp Training')
 parser.add_argument('--config', default=None, type=str,
                     help='Path to training data')
-parser.add_argument('--data_dir', default=None, type=str, metavar='PATH',
-                    help='path to data directory')
+parser.add_argument('--train_dir', default=None, type=str, metavar='PATH',
+                    help='path to training data')
+parser.add_argument('--val_dir', default=None, type=str, metavar='PATH',
+                    help='path to validation data')
 parser.add_argument('--epochs', default=None, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('--seed', default=42, type=int,
                     help='seed for initializing training. ')
-parser.add_argument('--ckp', default='sfnet_config0_0', type=str,
+parser.add_argument('--ckp', default='test', type=str,
                     help='checkpoint_name')
 parser.add_argument('--encoder', default='sfnet', type=str)
 parser.add_argument('--n_dummy_db', default=None, type=int)
@@ -89,9 +91,8 @@ def main():
     args = parser.parse_args()
     cfg = load_config(args.config)
     writer = SummaryWriter(f'runs/{args.ckp}')
-    data_dir = override(cfg['data_dir'],args.data_dir)
-    train_dir = cfg['train_dir']
-    valid_dir = cfg['val_dir']
+    train_dir = override(cfg['train_dir'], args.train_dir)
+    valid_dir = override(cfg['valid_dir'], args.valid_dir)
     ir_dir = cfg['ir_dir']
     noise_dir = cfg['noise_dir']
     
