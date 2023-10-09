@@ -7,11 +7,14 @@ import soundfile as sf
 import shutil
 import yaml
 
-def load_index(data_dir, ext=['wav','mp3'], max_len=10000):
+def load_index(data_dir, ext=['wav','mp3'], max_len=10000, inplace=False):
     dataset = {}
 
     print(f"=>Loading indices from {data_dir}")
-    json_path = os.path.join(data_dir, data_dir.split('/')[-1] + ".json")
+    if inplace:
+        json_path = os.path.join(data_dir, data_dir.split('/')[-1] + ".json")
+    else:
+        json_path = os.path.join('data', data_dir.split('/')[-1] + ".json")
     if not os.path.exists(json_path):
         idx = 0
         for fpath in glob.iglob(os.path.join(data_dir,'**/*.*'), recursive=True):

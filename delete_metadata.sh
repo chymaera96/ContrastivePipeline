@@ -1,4 +1,4 @@
-rm data/aug/ir/ir.json
-rm data/aug/noise/noise.json
-rm data/fma_medium/fma_medium.json
-rm data/valid/valid.json
+rm data/ir.json
+rm data/noise.json
+rm data/fma_medium.json
+rm data/valid.json
