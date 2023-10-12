@@ -8,7 +8,7 @@ noise_dir: 'data/aug/noise'
 # Model input parameters
 fs: 22050
 dur: 2.0
-offset: 0.4
+offset: 0.2
 norm: 0.95
 win_len: 740
 hop_len: 185
