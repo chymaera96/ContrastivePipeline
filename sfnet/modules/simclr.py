@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 d = 128
 h = 2304
-u = 32
+u = 16
 v = int(h/d)
 
 class SimCLR(nn.Module):
