@@ -20,16 +20,17 @@ class SimCLR(nn.Module):
     def forward(self, x_i, x_j):
         
         h_i = self.encoder(x_i)
+        print(f'Shape of h_i {h_i.shape} inside the SimCLR forward function')
         new_h_i = h_i.view(h_i.size(0), -1, v)
         z_i = self.projector(new_h_i).squeeze(-1)
         z_i = F.normalize(z_i, p=2)
+        print(f'Shape of z_i {z_i.shape} inside the SimCLR forward function')
+
 
         h_j = self.encoder(x_j)
         new_h_j = h_j.view(h_j.size(0), -1, v)
         z_j = self.projector(new_h_j).squeeze(-1)
         z_j = F.normalize(z_j, p=2)
-
-        print(f'Shape of z_i {z_i.shape} inside the SimCLR forward function')
 
 
         return h_i, h_j, z_i, z_j
