@@ -22,7 +22,8 @@ val_sz: 500
 bsz_train: 64
 alpha: 4
 beta: 8
-layers: [3, 4, 6, 3]
+# layers: [3, 4, 6, 3]
+layers: [2, 2, 2, 2]
 tau: 0.05
 lr: 2.0e-5
 n_epochs: 150

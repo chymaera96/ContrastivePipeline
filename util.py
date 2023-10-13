@@ -6,6 +6,8 @@ import glob
 import soundfile as sf
 import shutil
 import yaml
+from prettytable import PrettyTable
+
 
 def load_index(data_dir, ext=['wav','mp3'], max_len=10000, inplace=False):
     dataset = {}
@@ -152,8 +154,19 @@ def preprocess_aug_set_sr(data_dir, sr=22050):
         # sf.write(fpath, data=y, samplerate=sr)
     return
 
-
-
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad:
+            continue
+        params = parameter.numel()
+        table.add_row([name, params])
+        total_params += params
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
+    
 def main():
     # delete checkpoints for epochs under 100
     for fpath in glob.iglob(os.path.join('checkpoint','*.pth'), recursive=True):
