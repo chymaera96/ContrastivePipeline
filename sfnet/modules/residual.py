@@ -45,6 +45,62 @@ class ResidualUnit(nn.Module):
         out += residual
         out = self.relu(out)
         return out
+
+class ResNet(nn.Module):
+    def __init__(self, block, cfg):
+        super(ResNet, self).__init__()
+        self.inplanes = 64
+        self.alpha = cfg['alpha']
+        self.beta = cfg['beta']
+        self.layers = cfg['layers']
+        self.channels = [[64,64,256],[256,128,512],[512,256,1024],[1024,512,2048]] # [dim_in, dim_inner, dim_out]
+        self.conv1 = nn.Sequential(
+                        nn.Conv2d(1, 32, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
+                        nn.BatchNorm2d(32),
+                        nn.ReLU())
+        self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
+        self.layer2 = self._make_layer(block, self.channels[0], self.layers[0], temporal_conv=False)
+        self.layer3 = self._make_layer(block, self.channels[1], self.layers[1], temporal_conv=False)
+        self.layer4 = self._make_layer(block, self.channels[2], self.layers[2], temporal_conv=True)
+        self.layer5 = self._make_layer(block, self.channels[3], self.layers[3], temporal_conv=True)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(self.channels[3][-1], 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def _make_layer(self, block, channels, blocks, temporal_conv):
+        downsample = None
+        layers = []
+        if temporal_conv:
+            inplanes = int(channels[0] + channels[0] / self.alpha)
+        else:
+            inplanes = channels[0]
+
+        for i in range(blocks):
+            if i != 0:
+                downsample = nn.Sequential(
+                    nn.Conv2d(inplanes, channels[-1], kernel_size=1, stride=[1,1]),
+                    nn.BatchNorm2d(channels[-1]),
+                ) 
+            else:
+                downsample=None
+              
+            layers.append(block(inplanes, channels, temporal_conv, downsample))       
+            inplanes = channels[-1]
+
+        return nn.Sequential(*layers)
+    
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.maxpool
+        x = self.layer2(x)
+        x = self.layer3(x)  
+        x = self.layer4(x)
+        x = self.layer5(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+
+        return x        
     
 class FuseFastToSlow(nn.Module):
     """
