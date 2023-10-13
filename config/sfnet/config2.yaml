@@ -19,10 +19,10 @@ n_fft: 740
 # Dataset and Model hyperparameters
 train_sz: 10000
 val_sz: 500
-bsz_train: 128
+bsz_train: 64
 alpha: 4
 beta: 8
-layers: [2, 2, 2, 2]
+layers: [3, 4, 6, 3]
 tau: 0.05
 lr: 2.0e-5
 n_epochs: 150
