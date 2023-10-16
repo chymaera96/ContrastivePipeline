@@ -141,7 +141,7 @@ class SlowFastNetwork(nn.Module):
         self.layers = cfg['layers']
         self.fast_inplanes = self.slow_inplanes / self.beta
         self.channels = [[128,128,256],[256,128,512],[1024,512,2048],[1024,512,2048]] # [dim_in, dim_inner, dim_out]
-        slow_channels = (torch.Tensor(self.channels) / 2).type(torch.int64).tolist()
+        slow_channels = (torch.Tensor(self.channels)).type(torch.int64).tolist()
         fast_channels = (torch.Tensor(slow_channels) / self.beta).type(torch.int64).tolist()
 
         self.slow_conv1 = nn.Sequential(
