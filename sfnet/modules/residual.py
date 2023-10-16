@@ -145,8 +145,8 @@ class SlowFastNetwork(nn.Module):
         fast_channels = (torch.Tensor(slow_channels) / self.beta).type(torch.int64).tolist()
 
         self.slow_conv1 = nn.Sequential(
-                        nn.Conv2d(1, 128, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
-                        nn.GroupNorm(128,128),
+                        nn.Conv2d(1, 64, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
+                        nn.GroupNorm(64, 64),
                         nn.ReLU())
         self.fast_conv1 = nn.Sequential(
                         nn.Conv2d(1, 8, kernel_size = [5,7], stride = 2, padding = [2,3]), #correct
