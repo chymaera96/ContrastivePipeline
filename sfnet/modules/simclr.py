@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 d = 128
-h = 1152
+h = 2304
 u = 16
 v = int(h/d)
 
