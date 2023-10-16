@@ -149,7 +149,7 @@ class SlowFastNetwork(nn.Module):
                         nn.ReLU())
         self.fast_conv1 = nn.Sequential(
                         nn.Conv2d(1, 4, kernel_size = [5,7], stride = 2, padding = [2,3]), #correct
-                        nn.GroupNorm,(4,4),
+                        nn.GroupNorm(4,4),
                         nn.ReLU())
                 
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
