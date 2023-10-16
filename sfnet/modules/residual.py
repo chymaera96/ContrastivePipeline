@@ -119,7 +119,8 @@ class FuseFastToSlow(nn.Module):
             stride=[alpha, 1],
             padding=[int(fusion_kernel / 2), 0]
         )
-        self.bn = nn.GroupNorm(dim_in * fusion_conv_channel_ratio, dim_in * fusion_conv_channel_ratio)
+        self.bn = nn.GroupNorm(dim_in * fusion_conv_channel_ratio, 
+                               dim_in * fusion_conv_channel_ratio)
         self.relu = nn.ReLU()
 
     def forward(self, x_s, x_f):
@@ -139,17 +140,17 @@ class SlowFastNetwork(nn.Module):
         self.beta = cfg['beta']
         self.layers = cfg['layers']
         self.fast_inplanes = self.slow_inplanes / self.beta
-        self.channels = [[64,64,256],[256,128,512],[512,256,1024],[1024,512,2048]] # [dim_in, dim_inner, dim_out]
+        self.channels = [[128,128,256],[256,128,512],[1024,512,2048],[1024,512,2048]] # [dim_in, dim_inner, dim_out]
         slow_channels = (torch.Tensor(self.channels) / 2).type(torch.int64).tolist()
         fast_channels = (torch.Tensor(slow_channels) / self.beta).type(torch.int64).tolist()
 
         self.slow_conv1 = nn.Sequential(
-                        nn.Conv2d(1, 32, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
-                        nn.GroupNorm(32,32),
+                        nn.Conv2d(1, 128, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
+                        nn.GroupNorm(128,128),
                         nn.ReLU())
         self.fast_conv1 = nn.Sequential(
-                        nn.Conv2d(1, 4, kernel_size = [5,7], stride = 2, padding = [2,3]), #correct
-                        nn.GroupNorm(4,4),
+                        nn.Conv2d(1, 16, kernel_size = [5,7], stride = 2, padding = [2,3]), #correct
+                        nn.GroupNorm(16,16),
                         nn.ReLU())
                 
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
@@ -164,10 +165,10 @@ class SlowFastNetwork(nn.Module):
         self.fast_layer4 = self._make_layer(block, fast_channels[2], self.layers[2], temporal_conv=True, type="fast")
         self.fast_layer5 = self._make_layer(block, fast_channels[3], self.layers[3], temporal_conv=True, type="fast")
 
-        self.lateral_conv1 = FuseFastToSlow(dim_in=4, alpha=self.alpha) #correct
-        self.lateral_conv2 = FuseFastToSlow(dim_in=16, alpha=self.alpha) #correct ?!
-        self.lateral_conv3 = FuseFastToSlow(dim_in=32, alpha=self.alpha) #correct
-        self.lateral_conv4 = FuseFastToSlow(dim_in=64, alpha=self.alpha) #correct
+        self.lateral_conv1 = FuseFastToSlow(dim_in=16, alpha=self.alpha) #correct
+        self.lateral_conv2 = FuseFastToSlow(dim_in=64, alpha=self.alpha) #correct ?!
+        self.lateral_conv3 = FuseFastToSlow(dim_in=128, alpha=self.alpha) #correct
+        self.lateral_conv4 = FuseFastToSlow(dim_in=128, alpha=self.alpha) #correct
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
 
