@@ -166,9 +166,9 @@ class SlowFastNetwork(nn.Module):
         self.fast_layer5 = self._make_layer(block, fast_channels[3], self.layers[3], temporal_conv=True, type="fast")
 
         self.lateral_conv1 = FuseFastToSlow(dim_in=8, alpha=self.alpha) #correct
-        self.lateral_conv2 = FuseFastToSlow(dim_in=16, alpha=self.alpha) #correct ?!
-        self.lateral_conv3 = FuseFastToSlow(dim_in=32, alpha=self.alpha) #correct
-        self.lateral_conv4 = FuseFastToSlow(dim_in=64, alpha=self.alpha) #correct
+        self.lateral_conv2 = FuseFastToSlow(dim_in=32, alpha=self.alpha) #correct ?!
+        self.lateral_conv3 = FuseFastToSlow(dim_in=64, alpha=self.alpha) #correct
+        self.lateral_conv4 = FuseFastToSlow(dim_in=128, alpha=self.alpha) #correct
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
 
