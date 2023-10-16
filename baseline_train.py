@@ -162,7 +162,7 @@ def main():
         model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
     # pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     # print(f"Number of trainable parameters: {pytorch_total_params}")
-    print(count_parameters(model))
+    print(count_parameters(model, args.encoder))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = 1e-7)
