@@ -24,7 +24,7 @@ class ResidualUnit(nn.Module):
         
         self.conv3 = nn.Sequential(
                         nn.Conv2d(channels[1], channels[2], kernel_size = kernels[2], stride = [1,strides[2]], padding = 0),
-                        nn.GroupNorm(channels[1], channels[1]))
+                        nn.GroupNorm(channels[2], channels[2]))
         
         self.downsample = downsample
         self.relu = nn.ReLU()
