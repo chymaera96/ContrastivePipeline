@@ -154,7 +154,7 @@ def preprocess_aug_set_sr(data_dir, sr=22050):
         # sf.write(fpath, data=y, samplerate=sr)
     return
 
-def count_parameters(model):
+def count_parameters(model, encoder):
     table = PrettyTable(["Modules", "Parameters"])
     total_params = 0
     for name, parameter in model.named_parameters():
@@ -165,6 +165,9 @@ def count_parameters(model):
         total_params += params
     print(table)
     print(f"Total Trainable Params: {total_params}")
+    # Write table in text file
+    with open(f'model_summary_{encoder}.txt', 'w') as f:
+        f.write(str(table))
     return total_params
     
 def main():
