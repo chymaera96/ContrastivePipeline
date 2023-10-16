@@ -15,16 +15,16 @@ class ResidualUnit(nn.Module):
 
         self.conv1 = nn.Sequential(
                         nn.Conv2d(inplanes, channels[1], kernel_size = kernels[0], stride = [1,strides[0]], padding = [int(kernels[0][0] / 2) ,0]),
-                        nn.GroupNorm(channels[1], channels[1]),
+                        nn.BatchNorm2d(channels[1]),
                         nn.ReLU())
         self.conv2 = nn.Sequential(
                         nn.Conv2d(channels[1], channels[1], kernel_size = kernels[1], stride = [1,strides[1]], padding = [0,1]),
-                        nn.GroupNorm(channels[1], channels[1]),
+                        nn.BatchNorm2d(channels[1]),
                         nn.ReLU())
         
         self.conv3 = nn.Sequential(
                         nn.Conv2d(channels[1], channels[2], kernel_size = kernels[2], stride = [1,strides[2]], padding = 0),
-                        nn.GroupNorm(channels[1], channels[1]))
+                        nn.BatchNorm2d(channels[2]))
         
         self.downsample = downsample
         self.relu = nn.ReLU()
@@ -56,7 +56,7 @@ class ResNet(nn.Module):
         self.channels = [[64,64,256],[256,128,512],[512,256,1024],[1024,512,2048]] # [dim_in, dim_inner, dim_out]
         self.conv1 = nn.Sequential(
                         nn.Conv2d(1, 32, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
-                        nn.GroupNorm(32,32),
+                        nn.BatchNorm2d(32),
                         nn.ReLU())
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
         self.layer2 = self._make_layer(block, self.channels[0], self.layers[0], temporal_conv=False)
@@ -79,7 +79,7 @@ class ResNet(nn.Module):
             if i != 0:
                 downsample = nn.Sequential(
                     nn.Conv2d(inplanes, channels[-1], kernel_size=1, stride=[1,1]),
-                    nn.GroupNorm(channels[-1], channels[-1]),
+                    nn.BatchNorm2d(channels[-1]),
                 ) 
             else:
                 downsample=None
@@ -119,7 +119,7 @@ class FuseFastToSlow(nn.Module):
             stride=[alpha, 1],
             padding=[int(fusion_kernel / 2), 0]
         )
-        self.bn = nn.GroupNorm(dim_in * fusion_conv_channel_ratio, dim_in * fusion_conv_channel_ratio)
+        self.bn = nn.BatchNorm2d(dim_in * fusion_conv_channel_ratio)
         self.relu = nn.ReLU()
 
     def forward(self, x_s, x_f):
@@ -145,11 +145,11 @@ class SlowFastNetwork(nn.Module):
 
         self.slow_conv1 = nn.Sequential(
                         nn.Conv2d(1, 32, kernel_size = [1,7], stride = 2, padding = [0,3]), #correct
-                        nn.GroupNorm(32,32),
+                        nn.BatchNorm2d(32),
                         nn.ReLU())
         self.fast_conv1 = nn.Sequential(
                         nn.Conv2d(1, 4, kernel_size = [5,7], stride = 2, padding = [2,3]), #correct
-                        nn.GroupNorm,(4,4),
+                        nn.BatchNorm2d(4),
                         nn.ReLU())
                 
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
@@ -189,7 +189,7 @@ class SlowFastNetwork(nn.Module):
 
                 downsample = nn.Sequential(
                     nn.Conv2d(inplanes, channels[-1], kernel_size=1, stride=[1,strides[0]]),
-                    nn.GroupNorm(channels[-1], channels[-1]),
+                    nn.BatchNorm2d(channels[-1]),
                 ) 
             else:
                 downsample=None
