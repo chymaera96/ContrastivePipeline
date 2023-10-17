@@ -24,7 +24,7 @@ class SimCLR(nn.Module):
         
 
         h_i = self.encoder(x_i)
-        print(f'Shape of h_i {h_i.shape} inside the SimCLR forward function')
+        # print(f'Shape of h_i {h_i.shape} inside the SimCLR forward function')
         z_i = self.projector(h_i.unsqueeze(-1)).squeeze(-1)
         # print(f'Shape of z_i {z_i.shape} inside the SimCLR forward function')
         z_i = F.normalize(z_i, p=2)
