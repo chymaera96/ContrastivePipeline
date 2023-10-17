@@ -6,3 +6,4 @@ soundfile
 faiss-gpu
 tensorboard
 PyYAML
+prettytable
