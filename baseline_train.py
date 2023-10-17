@@ -165,7 +165,7 @@ def main():
     print(count_parameters(model, args.encoder))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = cfg['lr_min'])
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = cfg['min_lr'])
        
     if args.resume:
         if os.path.isfile(args.resume):
