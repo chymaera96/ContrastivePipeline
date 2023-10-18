@@ -25,10 +25,10 @@ beta: 8
 layers: [3, 4, 6, 3]
 # layers: [2, 2, 2, 2]
 tau: 0.05
-lr: 1.0e-4
-min_lr: 1.0e-6
+lr: 7.0e-5
+min_lr: 3.0e-6
 n_epochs: 220
-T_max: 200
+T_max: 220
 
 
 # Augmentation hyperparameters
