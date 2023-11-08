@@ -24,7 +24,7 @@ from test_fp import create_fp_db, create_dummy_db
 class MoCoEncoderTestCase(unittest.TestCase):
     def setUp(self):
         self.cfg = util.load_config('config/config3.yaml')
-        self.base_encoder = Encoder(self.cfg)
+        self.base_encoder = SlowFastNetwork(ResidualUnit, self.cfg)
         self.model = MoCo(self.cfg, self.base_encoder)
         self.device = torch.device("cuda")
         self.x_i = torch.randn(2, 1, 1000).to(self.device)
