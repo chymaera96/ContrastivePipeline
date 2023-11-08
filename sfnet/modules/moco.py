@@ -8,8 +8,8 @@ class MoCo(nn.Module):
     def __init__(self, cfg, base_encoder):
         super(MoCo, self).__init__()
         self.encoder_q = base_encoder
-        self.encoder_k = copy.deepcopy(base_encoder)
-        # self.encoder_k = base_encoder
+        # self.encoder_k = copy.deepcopy(base_encoder)
+        self.encoder_k = base_encoder
         d = cfg['dim']
         h = cfg['h']
         u = cfg['u']
