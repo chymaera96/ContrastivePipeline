@@ -8,7 +8,8 @@ class MoCo(nn.Module):
     def __init__(self, cfg, base_encoder):
         super(MoCo, self).__init__()
         self.encoder_q = base_encoder
-        self.encoder_k = copy.deepcopy(base_encoder)
+        # self.encoder_k = copy.deepcopy(base_encoder)
+        self.encoder_k = base_encoder
         d = cfg['dim']
         h = cfg['h']
         u = cfg['u']
@@ -32,7 +33,7 @@ class MoCo(nn.Module):
             self.encoder_q.parameters(), self.encoder_k.parameters()
         ):
             assert param_q is not param_k
-            
+
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
         """
