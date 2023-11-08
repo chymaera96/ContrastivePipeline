@@ -160,7 +160,7 @@ def main():
         encoder = SlowFastNetwork(ResidualUnit, cfg)
 
     if args.simclr:
-        model = SimCLR(encoder=encoder).to(device)
+        model = SimCLR(cfg=cfg, encoder=encoder).to(device)
     else:
         model = MoCo(cfg=cfg, base_encoder=encoder).to(device)
 
