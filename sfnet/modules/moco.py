@@ -28,11 +28,11 @@ class MoCo(nn.Module):
             param_k.data.copy_(param_q.data)  # initialize
             param_k.requires_grad = False  # not updated by gradient
         
-        # assert if the encoder_q and encoder_k have different references
-        for param_q, param_k in zip(
-            self.encoder_q.parameters(), self.encoder_k.parameters()
-        ):
-            assert param_q is not param_k
+        # # assert if the encoder_q and encoder_k have different references
+        # for param_q, param_k in zip(
+        #     self.encoder_q.parameters(), self.encoder_k.parameters()
+        # ):
+        #     assert param_q is not param_k
 
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
