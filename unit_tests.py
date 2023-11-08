@@ -31,12 +31,14 @@ class MoCoEncoderTestCase(unittest.TestCase):
         self.x_j = torch.randn(2, 1, 1000).to(self.device)
 
     def test_moco_storage(self):
-        x = self.model.encoder_q.parameters()
-        y = self.model.encoder_k.parameters()
+        # Get the first tensor in x and y
+        x = next(iter(self.model.encoder_q.parameters()))
+        y = next(iter(self.model.encoder_k.parameters()))
+
         x_ptrs = set(e.data_ptr() for e in x.view(-1))
         y_ptrs = set(e.data_ptr() for e in y.view(-1))
         flag = (x_ptrs <= y_ptrs) or (y_ptrs <= x_ptrs)
-        self.assertTrue(flag)
+        self.assertTrue(flag, 'The parameters of the two encoders are not the same')
 
 if __name__ == '__main__':
     unittest.main()
