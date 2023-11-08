@@ -13,6 +13,7 @@ from ntxent import ntxent_loss
 from sfnet.gpu_transformations import GPUTransformNeuralfp
 from sfnet.data_sans_transforms import NeuralfpDataset
 from sfnet.modules.simclr import SimCLR
+from sfnet.modules.moco import MoCo
 from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
 from baseline.encoder import Encoder
 from baseline.neuralfp import Neuralfp
@@ -43,17 +44,15 @@ parser.add_argument('--seed', default=42, type=int,
 parser.add_argument('--ckp', default='test', type=str,
                     help='checkpoint_name')
 parser.add_argument('--encoder', default='sfnet', type=str)
+parser.add_argument('--simclr', default=True, type=bool)
 parser.add_argument('--n_dummy_db', default=None, type=int)
 parser.add_argument('--n_query_db', default=None, type=int)
 
 
 
-def train(cfg, train_loader, model, optimizer, ir_idx, noise_idx, augment=None):
+def train(cfg, train_loader, model, optimizer, augment=None):
     model.train()
     loss_epoch = 0
-    # return loss_epoch
-    # if augment is None:
-    #     augment = GPUTransformNeuralfp(ir_dir=ir_idx, noise_dir=noise_idx, sample_rate=sr).to(device)
 
     for idx, (x_i, x_j) in enumerate(train_loader):
 
@@ -108,8 +107,6 @@ def main():
     # print(f"Size of validation index file {len(load_index(valid_dir))}")
 
 
-    # assert data_dir == os.path.join(root,"data/fma_8000")
-
     print("Intializing augmentation pipeline...")
     noise_train_idx = load_augmentation_index(noise_dir, splits=0.8)["train"]
     ir_train_idx = load_augmentation_index(ir_dir, splits=0.8)["train"]
@@ -157,11 +154,16 @@ def main():
     
     print("Creating new model...")
     if args.encoder == 'baseline':
-        model = Neuralfp(encoder=Encoder()).to(device)
+        encoder = Encoder()
+        # model = Neuralfp(encoder=Encoder()).to(device)
     elif args.encoder == 'sfnet':
-        model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
-    # pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    # print(f"Number of trainable parameters: {pytorch_total_params}")
+        encoder = SlowFastNetwork(ResidualUnit, cfg)
+
+    if args.simclr:
+        model = SimCLR(encoder=encoder).to(device)
+    else:
+        model = MoCo(cfg=cfg, base_encoder=encoder).to(device)
+
     print(count_parameters(model, args.encoder))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -189,7 +191,7 @@ def main():
 
     for epoch in range(start_epoch+1, num_epochs+1):
         print("#######Epoch {}#######".format(epoch))
-        loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, gpu_augment)
+        loss_epoch = train(cfg, train_loader, model, optimizer, gpu_augment)
         writer.add_scalar("Loss/train", loss_epoch, epoch)
         loss_log.append(loss_epoch)
         output_root_dir = create_fp_dir(ckp=args.ckp, epoch=epoch)
@@ -217,19 +219,6 @@ def main():
         if hit_rates is not None and hit_rates[0][0] > best_hr:
             best_hr = hit_rates[0][0]
             save_ckp(checkpoint, model_name, model_folder, epoch)
-
-        # elif hit_rates is not None and hit_rates[0][0] > best_hr:
-        #     best_hr = hit_rates[0][0]
-        #     checkpoint = {
-        #         'epoch': epoch,
-        #         'loss': loss_log,
-        #         'valid_acc' : hit_rate_log,
-        #         'hit_rate': hit_rates,
-        #         'state_dict': model.state_dict(),
-        #         'optimizer': optimizer.state_dict(),
-        #         'scheduler': scheduler.state_dict()
-        #     }
-        #     save_ckp(checkpoint,epoch, model_name, model_folder)
             
         scheduler.step()
     

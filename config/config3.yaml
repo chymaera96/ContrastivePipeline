@@ -22,8 +22,8 @@ val_sz: 500
 bsz_train: 256
 alpha: 4
 beta: 8
-layers: [3, 4, 6, 3]
-# layers: [2, 2, 2, 2]
+# layers: [3, 4, 6, 3]
+layers: [2, 2, 2, 2]
 dim: 128
 h: 2304
 u: 16
@@ -32,6 +32,7 @@ lr: 1.0e-4
 min_lr: 3.0e-6
 n_epochs: 220
 T_max: 250
+momentum: 0.999
 
 
 # Augmentation hyperparameters
