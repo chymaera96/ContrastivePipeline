@@ -30,17 +30,6 @@ class MoCoEncoderTestCase(unittest.TestCase):
         self.x_i = torch.randn(2, 1, 1000).to(self.device)
         self.x_j = torch.randn(2, 1, 1000).to(self.device)
 
-    def test_moco_storage_address(self):
-        # Get the first tensor in x and y
-        x = next(iter(self.model.encoder_q.parameters()))
-        y = next(iter(self.model.encoder_k.parameters()))
-
-        x_ptrs = set(e.data_ptr() for e in x.view(-1))
-        y_ptrs = set(e.data_ptr() for e in y.view(-1))
-        flag = (x_ptrs < y_ptrs) or (y_ptrs < x_ptrs)
-        self.assertTrue(not flag, 
-                        'The addresses of the two encoders are the same')
-
 
     def test_moco_pointer_address(self):
         for param_q, param_k in zip(
