@@ -175,14 +175,17 @@ def count_parameters(model, encoder):
 def get_test_index(data_dir):
     train_idx = load_index(data_dir)
     all_file_list = glob.glob(os.path.join(data_dir,'**/*.*'), recursive=True)
+    print(f'Number of files in {data_dir}: {len(all_file_list)}')
     # test_idx = {str(i):f for i,f in enumerate(all_file_list) if f not in train_idx.values()}
     idx = 0
     test_idx = {}
-    for fpath in all_file_list:
+    for i, fpath in enumerate(all_file_list):
+        if i % 200 == 0:
+            print(f"Processed {i}/{len(all_file_list)} files")
         if fpath not in train_idx.values():
             test_idx[str(idx)] = fpath
             idx += 1
-            
+
     return test_idx
     
 def main():
