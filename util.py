@@ -175,7 +175,14 @@ def count_parameters(model, encoder):
 def get_test_index(data_dir):
     train_idx = load_index(data_dir)
     all_file_list = glob.glob(os.path.join(data_dir,'**/*.*'), recursive=True)
-    test_idx = {str(i):f for i,f in enumerate(all_file_list) if f not in train_idx.values()}
+    # test_idx = {str(i):f for i,f in enumerate(all_file_list) if f not in train_idx.values()}
+    idx = 0
+    test_idx = {}
+    for fpath in all_file_list:
+        if fpath not in train_idx.values():
+            test_idx[str(idx)] = fpath
+            idx += 1
+            
     return test_idx
     
 def main():
