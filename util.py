@@ -174,7 +174,7 @@ def count_parameters(model, encoder):
     # Get paths of files not in the index
 def get_test_index(data_dir):
     train_idx = load_index(data_dir)
-    all_file_list = glob.glob(os.path.join(data_dir,'**/*.*'), recursive=True)
+    all_file_list = glob.glob(os.path.join(data_dir,'**/*.mp3'), recursive=True)
     print(f'Number of files in {data_dir}: {len(all_file_list)}')
     # test_idx = {str(i):f for i,f in enumerate(all_file_list) if f not in train_idx.values()}
     idx = 0
