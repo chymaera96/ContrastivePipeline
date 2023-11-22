@@ -25,8 +25,9 @@ beta: 8
 layers: [1, 1, 1, 1]
 tau: 0.05
 lr: 5.0e-5
-n_epochs: 120
-T_max: 120
+min_lr: 3.0e-6
+n_epochs: 200
+T_max: 250
 
 # Augmentation hyperparameters
 n_frames: 32 # depends on the spectrogram parameters
