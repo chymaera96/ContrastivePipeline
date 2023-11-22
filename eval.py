@@ -169,8 +169,9 @@ def eval_faiss(emb_dir,
     """
     Segment/sequence-wise audio search experiment and evaluation: implementation based on FAISS.
     """
-    test_seq_len = np.asarray(
-        list(map(int, test_seq_len.split())))  # '1 3 5' --> [1, 3, 5]
+    if type(test_seq_len) == str:
+        test_seq_len = np.asarray(
+            list(map(int, test_seq_len.split())))  # '1 3 5' --> [1, 3, 5]
 
     # Load items from {query, db, dummy_db}
     query, query_shape = load_memmap_data(emb_dir, 'query')

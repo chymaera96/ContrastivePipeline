@@ -169,14 +169,21 @@ def count_parameters(model, encoder):
     with open(f'model_summary_{encoder}.txt', 'w') as f:
         f.write(str(table))
     return total_params
+
+
+    # Get paths of files not in the index
+def get_test_index(data_dir):
+    train_idx = load_index(data_dir)
+    all_file_list = glob.glob(os.path.join(data_dir,'**/*.*'), recursive=True)
+    test_idx = {str(i):f for i,f in enumerate(all_file_list) if f not in train_idx.values()}
+    return test_idx
     
 def main():
-    # delete checkpoints for epochs under 100
-    for fpath in glob.iglob(os.path.join('checkpoint','*.pth'), recursive=True):
-        epoch = int(fpath.split('/')[-1].split('_')[-1].split('.')[0])
-        if epoch <= 100:
-            os.remove(fpath)
-
+    data_dir = '/import/c4dm-datasets-ext/fma/fma/data/fma_medium'
+    test_idx = get_test_index(data_dir)
+    print(len(test_idx))
+    print(list(test_idx.items())[:5])
+    json_dir = os.path.join('data', 'test_idx.json')
 
 if __name__ == '__main__':
     main()

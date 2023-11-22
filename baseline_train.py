@@ -29,7 +29,7 @@ device = torch.device("cuda")
 
 parser = argparse.ArgumentParser(description='Neuralfp Training')
 parser.add_argument('--config', default=None, type=str,
-                    help='Path to training data')
+                    help='Path to config file')
 parser.add_argument('--train_dir', default=None, type=str, metavar='PATH',
                     help='path to training data')
 parser.add_argument('--val_dir', default=None, type=str, metavar='PATH',
