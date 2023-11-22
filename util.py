@@ -184,6 +184,8 @@ def main():
     print(len(test_idx))
     print(list(test_idx.items())[:5])
     json_dir = os.path.join('data', 'test_idx.json')
+    with open(json_dir, 'w') as fp:
+        json.dump(test_idx, fp)
 
 if __name__ == '__main__':
     main()
