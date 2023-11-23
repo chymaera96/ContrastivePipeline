@@ -70,11 +70,11 @@ class GPUTransformNeuralfp(nn.Module):
         
         else:
             X_i = self.logmelspec(x_i.squeeze(0)).permute(2,0,1)
-            X_i = X_i.unfold(0, size=self.n_frames, step=self.n_frames//self.overlap)
+            X_i = X_i.unfold(0, size=self.n_frames, step=int(self.n_frames*(1-self.overlap)))
 
             x_j = self.val_transform(x_j, sample_rate=self.sample_rate)
             X_j = self.logmelspec(x_j.squeeze(0)).permute(2,0,1)
-            X_j = X_j.unfold(0, size=self.n_frames, step=self.n_frames//self.overlap)
+            X_j = X_j.unfold(0, size=self.n_frames, step=int(self.n_frames*(1-self.overlap)))
 
         if self.n_frames == 240:    # sfnet has transposed shape   
             return X_i.permute(0,1,3,2), X_j.permute(0,1,3,2)
