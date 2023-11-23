@@ -215,9 +215,9 @@ def main():
         test_seq_len = args.query_lens
 
     for ckp_name, epochs in test_cfg.items():
-        writer = SummaryWriter(f'runs/{args.ckp}')
         if not type(epochs) == list:
             epochs = [epochs]   # Hack to handle case where only best ckp is to be tested
+        writer = SummaryWriter(f'runs/{ckp_name}')
 
         for epoch in epochs:
             ckp = os.path.join(model_folder, f'model_{ckp_name}_{str(epoch)}.pth')
