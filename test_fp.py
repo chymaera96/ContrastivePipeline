@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 from util import *
-from sfnet.data import NeuralfpDataset
+from sfnet.data_sans_transforms import NeuralfpDataset
 from sfnet.modules.simclr import SimCLR
 from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
 from baseline.encoder import Encoder
@@ -176,7 +176,7 @@ def main():
                                         noise_dir=noise_test_idx, 
                                         train=False).to(device)
 
-    dataset = NeuralfpDataset(cfg=cfg, path=args.test_dir, transform=test_augment, train=False)
+    dataset = NeuralfpDataset(cfg, path=args.test_dir, transform=test_augment, train=False)
 
 
     dataset_size = len(dataset)
