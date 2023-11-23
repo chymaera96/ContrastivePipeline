@@ -156,7 +156,6 @@ def main():
     args = parser.parse_args()
     cfg = load_config(args.config)
     test_cfg = load_config(args.test_config)
-    fp_dir = override(cfg['fp_dir'], args.fp_dir)
     ir_dir = cfg['ir_dir']
     noise_dir = cfg['noise_dir']
     # Hyperparameters
@@ -239,7 +238,8 @@ def main():
             else:
                 print("=> no checkpoint found at '{}'".format(ckp))
                 continue
-
+            
+            fp_dir = create_fp_dir(resume=ckp, train=False)
             create_fp_db(query_db_loader, model, fp_dir)
             create_dummy_db(dummy_db_loader, model, fp_dir)
 

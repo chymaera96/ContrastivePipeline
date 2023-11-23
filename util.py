@@ -99,8 +99,12 @@ def load_config(config_path):
 def override(config_val, arg):
     return arg if arg is not None else config_val 
 
-def create_fp_dir(resume=None, ckp=None, epoch=1):
-    parent_dir = 'logs/emb'
+def create_fp_dir(resume=None, ckp=None, epoch=1, train=True):
+    if train:
+        parent_dir = 'logs/emb/valid'
+    else:
+        parent_dir = 'logs/emb/test'
+        
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
     if resume is not None:
