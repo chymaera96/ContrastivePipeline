@@ -240,10 +240,12 @@ def main():
                 continue
             
             fp_dir = create_fp_dir(resume=ckp, train=False)
-            create_fp_db(query_db_loader, model, fp_dir)
-            create_dummy_db(dummy_db_loader, model, fp_dir)
+            create_dummy_db(dummy_db_loader, augment=test_augment,
+                             model=model, output_root_dir=fp_dir, verbose=False)
+            create_fp_db(query_db_loader, augment=test_augment, 
+                         model=model, output_root_dir=fp_dir, verbose=False)
 
-            hit_rates = eval_faiss(emb_dir=args.fp_dir, 
+            hit_rates = eval_faiss(emb_dir=fp_dir, 
                                 test_ids='all', 
                                 test_seq_len=test_seq_len, 
                                 index_type=index_type)

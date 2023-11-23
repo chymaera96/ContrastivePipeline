@@ -12,6 +12,11 @@ from prettytable import PrettyTable
 def load_index(data_dir, ext=['wav','mp3'], max_len=10000, inplace=False):
     dataset = {}
 
+    if data_dir.endswith('.json'):
+        with open(data_dir, 'r') as fp:
+            dataset = json.load(fp)
+        return dataset
+    
     print(f"=>Loading indices from {data_dir}")
     if inplace:
         json_path = os.path.join(data_dir, data_dir.split('/')[-1] + ".json")
@@ -104,7 +109,7 @@ def create_fp_dir(resume=None, ckp=None, epoch=1, train=True):
         parent_dir = 'logs/emb/valid'
     else:
         parent_dir = 'logs/emb/test'
-        
+
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
     if resume is not None:
