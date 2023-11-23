@@ -176,7 +176,7 @@ def main():
                                         noise_dir=noise_test_idx, 
                                         train=False).to(device)
 
-    dataset = NeuralfpDataset(cfg, path=args.test_dir, transform=test_augment, train=False)
+    dataset = NeuralfpDataset(cfg=cfg, path=args.test_dir, transform=test_augment, train=False)
 
 
     dataset_size = len(dataset)
