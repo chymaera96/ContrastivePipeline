@@ -31,7 +31,7 @@ parser.add_argument('--config', default=None, type=str,
                     help='Path to config file')
 parser.add_argument('--test_config', default=None, type=str)
 parser.add_argument('--seed', default=42, type=int,
-                    help='seed for initializing training. ')
+                    help='seed for initializing testing. ')
 parser.add_argument('--test_dir', default='', type=str)
 parser.add_argument('--fp_dir', default='fingerprints', type=str)
 parser.add_argument('--query_lens', default='1 3 5 9 11 19', type=str)
@@ -190,13 +190,16 @@ def main():
 
     dataset_size = len(dataset)
     indices = list(range(dataset_size))
-    split1 = override(cfg['n_dummy'],args.n_dummy_db)
-    split2 = override(cfg['n_query'],args.n_query_db)
+    split1 = args.n_dummy_db
+    split2 = args.n_query_db
+    if split1 is None:
+        split1 = len(dataset) - split2
     if shuffle_dataset :
         np.random.seed(random_seed)
         np.random.shuffle(indices)
     dummy_indices, query_db_indices = indices[:split1], indices[split1: split1 + split2]
 
+    print(f"Creating dummy db with {len(dummy_indices)} samples and query db with {len(query_db_indices)} samples")
     dummy_db_sampler = SubsetRandomSampler(dummy_indices)
     query_db_sampler = SubsetRandomSampler(query_db_indices)
 
@@ -230,7 +233,7 @@ def main():
     else:
         test_seq_len = args.query_lens
 
-    for ckp_name, epochs in args.test_cfg.items():
+    for ckp_name, epochs in test_cfg.items():
         writer = SummaryWriter(f'runs/{args.ckp}')
         if not type(epochs) == list:
             epochs = [epochs]   # Hack to handle case where only best ckp is to be tested
