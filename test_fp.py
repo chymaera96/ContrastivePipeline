@@ -169,14 +169,6 @@ def main():
     elif args.encoder == 'sfnet':
         model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
 
-       
-    if os.path.isfile(args.ckp):
-        print("=> loading checkpoint '{}'".format(args.ckp))
-        checkpoint = torch.load(args.ckp)
-        model.load_state_dict(checkpoint['state_dict'])
-    else:
-        print("=> no checkpoint found at '{}'".format(args.ckp))
-
 
     print("Creating dataloaders ...")
     noise_test_idx = load_augmentation_index(noise_dir, splits=0.8)["test"]
