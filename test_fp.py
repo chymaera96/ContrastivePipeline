@@ -34,7 +34,7 @@ parser.add_argument('--seed', default=42, type=int,
                     help='seed for initializing testing. ')
 parser.add_argument('--test_dir', default='', type=str)
 parser.add_argument('--fp_dir', default='fingerprints', type=str)
-parser.add_argument('--query_lens', default='1 3 5 9 11 19', type=str)
+parser.add_argument('--query_lens', default=None, type=str)
 parser.add_argument('--encoder', default='sfnet', type=str)
 parser.add_argument('--n_dummy_db', default=None, type=int)
 parser.add_argument('--n_query_db', default=1000, type=int)
@@ -42,16 +42,8 @@ parser.add_argument('--compute_fp', default=True, type=bool)
 parser.add_argument('--small_test', default=False, type=bool)
 
 
-
 device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
 
-def query_len_from_seconds(seconds, overlap, dur):
-    hop = dur*(1-overlap)
-    return int((seconds-dur)/hop + 1)
-
-def seconds_from_query_len(query_len, overlap, dur):
-    hop = dur*(1-overlap)
-    return int((query_len-1)*hop + dur)
 
 
 def create_table(hit_rates, test_seq_len, overlap, dur):
@@ -215,6 +207,7 @@ def main():
         index_type = 'ivfpq'
 
     if args.query_lens is not None:
+        args.query_lens = [int(q) for q in args.query_lens.split(',')]
         test_seq_len = [query_len_from_seconds(q, cfg['overlap'], dur=cfg['dur'])
                         for q in args.query_lens]
         
@@ -242,10 +235,15 @@ def main():
             create_fp_db(query_db_loader, augment=test_augment, 
                          model=model, output_root_dir=fp_dir, verbose=False)
 
-            hit_rates = eval_faiss(emb_dir=fp_dir, 
-                                test_ids='all', 
-                                test_seq_len=test_seq_len, 
-                                index_type=index_type)
+            if args.test_seq_len is not None:
+                hit_rates = eval_faiss(emb_dir=fp_dir, 
+                                    test_ids='all', 
+                                    test_seq_len=test_seq_len, 
+                                    index_type=index_type)   
+            else:
+                hit_rates = eval_faiss(emb_dir=fp_dir, 
+                                    test_ids='all', 
+                                    index_type=index_type)
 
 
             print("-------Test hit-rates-------")

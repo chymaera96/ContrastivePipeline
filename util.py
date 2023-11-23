@@ -82,6 +82,13 @@ def get_frames(y, frame_length, hop_length):
 def qtile_normalize(y, q, eps=1e-8):
     return y / (eps + torch.quantile(y,q=q))
 
+def query_len_from_seconds(seconds, overlap, dur):
+    hop = dur*(1-overlap)
+    return int((seconds-dur)/hop + 1)
+
+def seconds_from_query_len(query_len, overlap, dur):
+    hop = dur*(1-overlap)
+    return int((query_len-1)*hop + dur)
 
 def load_ckp(checkpoint_fpath, model, optimizer, scheduler):
     checkpoint = torch.load(checkpoint_fpath)
