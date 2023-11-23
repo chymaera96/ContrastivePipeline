@@ -214,9 +214,6 @@ def main():
     else:
         index_type = 'ivfpq'
 
-    if not os.path.exists(fp_dir):
-        os.mkdir(fp_dir)
-
     if args.query_lens is not None:
         test_seq_len = [query_len_from_seconds(q, cfg['overlap'], dur=cfg['dur'])
                         for q in args.query_lens]
