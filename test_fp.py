@@ -46,7 +46,7 @@ device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
 
 
 
-def create_table(hit_rates, test_seq_len, overlap, dur):
+def create_table(hit_rates, overlap, dur, test_seq_len=[1,3,5,9,11,19]):
     table = f'''<table>
     <tr>
     <th>Query Length</th>
@@ -239,23 +239,29 @@ def main():
                 hit_rates = eval_faiss(emb_dir=fp_dir, 
                                     test_ids='all', 
                                     test_seq_len=test_seq_len, 
-                                    index_type=index_type)   
+                                    index_type=index_type) 
+
+                writer.add_text("table", 
+                                create_table(hit_rates, 
+                                            cfg['overlap'], cfg['dur'],
+                                            test_seq_len), 
+                                epoch)
+  
             else:
                 hit_rates = eval_faiss(emb_dir=fp_dir, 
                                     test_ids='all', 
                                     index_type=index_type)
+                
+                writer.add_text("table", 
+                                create_table(hit_rates, 
+                                            cfg['overlap'], cfg['dur']), 
+                                epoch)
 
 
             print("-------Test hit-rates-------")
             # Create table
             print(f'Top-1 exact hit rate = {hit_rates[0]}')
             print(f'Top-1 near hit rate = {hit_rates[1]}')
-
-            writer.add_text("table", 
-                            create_table(hit_rates, 
-                                         test_seq_len, 
-                                         cfg['overlap'], cfg['dur']), 
-                            epoch)
 
 
 
