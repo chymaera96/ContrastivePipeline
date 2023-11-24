@@ -234,6 +234,11 @@ def main():
                              model=model, output_root_dir=fp_dir, verbose=False)
             create_fp_db(query_db_loader, augment=test_augment, 
                          model=model, output_root_dir=fp_dir, verbose=False)
+            
+            if type(epoch) == int:
+                label = epoch
+            else:
+                label = 0
 
             if args.query_lens is not None:
                 hit_rates = eval_faiss(emb_dir=fp_dir, 
@@ -245,7 +250,7 @@ def main():
                                 create_table(hit_rates, 
                                             cfg['overlap'], cfg['dur'],
                                             test_seq_len), 
-                                epoch)
+                                label)
   
             else:
                 hit_rates = eval_faiss(emb_dir=fp_dir, 
@@ -255,7 +260,7 @@ def main():
                 writer.add_text("table", 
                                 create_table(hit_rates, 
                                             cfg['overlap'], cfg['dur']), 
-                                epoch)
+                                label)
 
 
             print("-------Test hit-rates-------")
