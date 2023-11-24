@@ -235,7 +235,7 @@ def main():
             create_fp_db(query_db_loader, augment=test_augment, 
                          model=model, output_root_dir=fp_dir, verbose=False)
 
-            if args.test_seq_len is not None:
+            if args.query_lens is not None:
                 hit_rates = eval_faiss(emb_dir=fp_dir, 
                                     test_ids='all', 
                                     test_seq_len=test_seq_len, 
