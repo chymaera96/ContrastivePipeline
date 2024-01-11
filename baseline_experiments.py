@@ -114,9 +114,9 @@ def main():
 
 
     print("Intializing augmentation pipeline...") 
-    noise_train_idx = load_augmentation_index(noise_dir, json_path=args.train_noise_idx, splits=1.0)["train"]
+    noise_train_idx = load_augmentation_index(noise_dir, json_path=args.train_noise_idx, splits=1.0)
     ir_train_idx = load_augmentation_index(ir_dir, splits=0.8)["train"]
-    noise_val_idx = load_augmentation_index(noise_dir, json_path=args.test_noise_idx, splits=1.0)["train"]
+    noise_val_idx = load_augmentation_index(noise_dir, json_path=args.test_noise_idx, splits=1.0)
     ir_val_idx = load_augmentation_index(ir_dir, splits=0.8)["test"]
     gpu_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_train_idx, noise_dir=noise_train_idx, train=True).to(device)
     cpu_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_train_idx, noise_dir=noise_train_idx, cpu=True)
