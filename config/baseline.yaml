@@ -4,6 +4,7 @@ train_dir: 'data/fma_medium'
 val_dir: 'data/valid'
 ir_dir: 'data/aug/ir'
 noise_dir: 'data/aug/noise'
+test_noise_dir: '/import/c4dm-datasets/FSD80K/dev_audio'
 
 # Model input parameters
 fs: 8000
