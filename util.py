@@ -206,13 +206,16 @@ def get_test_index(data_dir):
     return test_idx
     
 def main():
-    data_dir = '/import/c4dm-datasets-ext/fma/fma/data/fma_medium'
-    test_idx = get_test_index(data_dir)
-    print(len(test_idx))
-    print(list(test_idx.items())[:5])
-    json_dir = os.path.join('data', 'test_idx.json')
-    with open(json_dir, 'w') as fp:
-        json.dump(test_idx, fp)
+    test_noise_dir = '/import/c4dm-datasets/FSD80K/dev_audio'
+    for label in ['speech', 'vehicle', 'farm', 'home']:
+        noise_train_idx = load_augmentation_index(test_noise_dir, json_path=label+'.json', splits=1.0)
+        # Check if files in index are in the directory
+        for fpath in noise_train_idx:
+            if not os.path.exists(fpath):
+                del noise_train_idx[fpath]
+        with open(label+'.json', 'w') as fp:
+            json.dump(noise_train_idx, fp)
+
 
 if __name__ == '__main__':
     main()
