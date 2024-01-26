@@ -206,7 +206,7 @@ def get_test_index(data_dir):
     return test_idx
     
 def main():
-    test_noise_dir = '/import/c4dm-datasets/FSD80K/dev_audio'
+    test_noise_dir = '/import/c4dm-datasets/FSD50K/dev_audio'
     for label in ['speech', 'vehicle', 'farm', 'home']:
         noise_train_idx = load_augmentation_index(test_noise_dir, json_path=label+'.json', splits=1.0)
         # Check if files in index are in the directory
