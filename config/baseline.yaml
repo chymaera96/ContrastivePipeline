@@ -43,5 +43,5 @@ ir_prob: 0.0
 
 
 # Database sizes (validation)
-n_dummy: 100
-n_query: 20
+n_dummy: 400
+n_query: 100
