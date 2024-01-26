@@ -212,7 +212,7 @@ def main():
         # Check if files in index are in the directory
         for fpath in noise_train_idx:
             if not os.path.exists(fpath):
-                del noise_train_idx[fpath]
+                noise_train_idx.remove(fpath)
         with open(label+'.json', 'w') as fp:
             json.dump(noise_train_idx, fp)
 
