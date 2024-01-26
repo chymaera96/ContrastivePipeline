@@ -212,6 +212,8 @@ def main():
         # Check if files in index are in the directory
         for fpath in noise_train_idx:
             if not os.path.exists(fpath):
+                print(fpath)
+                break
                 print(f"File {fpath} not found. Removing from index")
                 noise_train_idx.remove(fpath)
         with open(label+'.json', 'w') as fp:
