@@ -52,7 +52,11 @@ class GPUTransformNeuralfp(nn.Module):
     def forward(self, x_i, x_j):
 
         if self.cpu:
-            x_j = self.cpu_transform(x_j.view(1,1,x_j.shape[-1]), sample_rate=self.sample_rate)
+            try:
+                x_j = self.cpu_transform(x_j.view(1,1,x_j.shape[-1]), sample_rate=self.sample_rate)
+            except ValueError:
+                print("Error loading noise file. Returning original audio.")
+                x_j = x_j.view(1,1,x_j.shape[-1])
             return x_i, x_j.flatten()
 
 
