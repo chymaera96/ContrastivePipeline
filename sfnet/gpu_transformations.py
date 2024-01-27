@@ -55,8 +55,10 @@ class GPUTransformNeuralfp(nn.Module):
             try:
                 x_j = self.cpu_transform(x_j.view(1,1,x_j.shape[-1]), sample_rate=self.sample_rate)
             except ValueError:
-                print("Error loading noise file. Returning original audio.")
-                x_j = x_j.view(1,1,x_j.shape[-1])
+                print("Error loading noise file. Hack to solve issue...")
+                # Increase length of x_j by 1 sample
+                x_j = F.pad(x_j, (0,1))
+                x_j = self.cpu_transform(x_j.view(1,1,x_j.shape[-1]), sample_rate=self.sample_rate)
             return x_i, x_j.flatten()
 
 
