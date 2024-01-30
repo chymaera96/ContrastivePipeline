@@ -78,7 +78,12 @@ class GPUTransformNeuralfp(nn.Module):
             X_i = self.logmelspec(x_i.squeeze(0)).permute(2,0,1)
             X_i = X_i.unfold(0, size=self.n_frames, step=int(self.n_frames*(1-self.overlap)))
 
-            x_j = self.val_transform(x_j, sample_rate=self.sample_rate)
+            try:
+                x_j = self.val_transform(x_j, sample_rate=self.sample_rate)
+            except ValueError:
+                print("Error loading noise file. Retrying...")
+                x_j = self.val_transform(x_j, sample_rate=self.sample_rate)
+
             X_j = self.logmelspec(x_j.squeeze(0)).permute(2,0,1)
             X_j = X_j.unfold(0, size=self.n_frames, step=int(self.n_frames*(1-self.overlap)))
 
