@@ -13,6 +13,7 @@ def load_index(data_dir, ext=['wav','mp3'], max_len=10000, inplace=False):
     dataset = {}
 
     if data_dir.endswith('.json'):
+        print(f"=>Loading indices from index file {data_dir}")
         with open(data_dir, 'r') as fp:
             dataset = json.load(fp)
         return dataset
