@@ -11,7 +11,10 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.tensorboard import SummaryWriter
 
 
-from util import *
+from util import \
+create_fp_dir, load_config, \
+query_len_from_seconds, seconds_from_query_len, \
+load_augmentation_index
 from sfnet.data_sans_transforms import NeuralfpDataset
 from sfnet.modules.simclr import SimCLR
 from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
@@ -33,6 +36,9 @@ parser.add_argument('--test_config', default=None, type=str)
 parser.add_argument('--seed', default=42, type=int,
                     help='seed for initializing testing. ')
 parser.add_argument('--test_dir', default='', type=str)
+parser.add_argument('--noise_idx', default=None, type=str)
+parser.add_argument('--noise_split', default='all', type=str,
+                    help='Noise index file split to use for testing (all, test)')
 parser.add_argument('--fp_dir', default='fingerprints', type=str)
 parser.add_argument('--query_lens', default=None, type=str)
 parser.add_argument('--encoder', default='sfnet', type=str)
@@ -162,13 +168,18 @@ def main():
 
 
     print("Creating dataloaders ...")
-    noise_test_idx = load_augmentation_index(noise_dir, splits=0.8)["test"]
+
+    # Augmentation for testing with specific noise subsets
+    if args.json_path is not None:
+        noise_test_idx = load_augmentation_index(noise_dir, json_path=args.train_noise_idx, splits=0.8)[args.noise_split]
+    else:
+        noise_test_idx = load_augmentation_index(noise_dir, splits=0.8)["test"]
     ir_test_idx = load_augmentation_index(ir_dir, splits=0.8)["test"]
     test_augment = GPUTransformNeuralfp(cfg=cfg, ir_dir=ir_test_idx, 
                                         noise_dir=noise_test_idx, 
                                         train=False).to(device)
 
-    dataset = NeuralfpDataset(cfg, path=args.test_dir, transform=test_augment, train=False)
+    dataset = NeuralfpDataset(cfg, path=args.test_dir, train=False)
 
 
     dataset_size = len(dataset)
@@ -211,8 +222,6 @@ def main():
         test_seq_len = [query_len_from_seconds(q, cfg['overlap'], dur=cfg['dur'])
                         for q in args.query_lens]
         
-    else:
-        test_seq_len = args.query_lens
 
     for ckp_name, epochs in test_cfg.items():
         if not type(epochs) == list:
