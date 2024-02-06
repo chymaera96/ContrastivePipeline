@@ -115,11 +115,11 @@ def main():
 
     print("Intializing augmentation pipeline...") 
     if args.train_noise_idx == args.test_noise_idx:
-        split1 = ['train']
-        split2 = ['test']
+        split1 = 'train'
+        split2 = 'test'
     else:
-        split1 = ["all"]
-        split2 = ["all"]
+        split1 = "all"
+        split2 = "all"
     noise_train_idx = load_augmentation_index(noise_dir, json_path=args.train_noise_idx, splits=1.0)[split1]
     ir_train_idx = load_augmentation_index(ir_dir, splits=0.8)["train"]
     noise_val_idx = load_augmentation_index(noise_dir, json_path=args.test_noise_idx, splits=1.0)[split2]
