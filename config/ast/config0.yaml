@@ -6,42 +6,39 @@ ir_dir: 'data/aug/ir'
 noise_dir: 'data/aug/noise'
 
 # Model input parameters
-fs: 22050
-dur: 2.0
-offset: 0.2
+fs: 16000
+dur: 1.0
+offset: 0.05
 norm: 0.95
-win_len: 740
-hop_len: 185
-n_mels: 128
-n_fft: 740
+win_len: 400
+hop_len: 168
+n_mels: 64
+n_fft: 400
 
 
 # Dataset and Model hyperparameters
 train_sz: 10000
 val_sz: 500
-bsz_train: 128
-alpha: 4
-beta: 8
-layers: [1, 1, 2, 2]
-tau: 0.05
+bsz_train: 256
+tau: 0.1
 lr: 1.0e-4
-n_epochs: 150
-T_max: 120
+n_epochs: 300
+T_max: 300
 
 # Augmentation hyperparameters
-n_frames: 240 # depends on the spectrogram parameters
-tr_snr: [0, 10]
-val_snr: [0, 10]
-test_snr: [0, 10]
-time_mask: 80
-freq_mask: 64
-noise_prob: 0.5
-ir_prob: 0.5
+n_frames: 96 # depends on the spectrogram parameters
+tr_snr: [0, 25]
+val_snr: [0, 25]
+test_snr: [0, 25]
+time_mask: 48
+freq_mask: 32
+noise_prob: 0.9
+ir_prob: 0.9
 
 # Model architecture
 d: 128
-h: 2304
-u: 16
+h: 1024
+u: 32
 
 # Database sizes (validation)
 n_dummy: 100

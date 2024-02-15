@@ -8,12 +8,14 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.tensorboard import SummaryWriter
 
 
+
 from util import *
-from ntxent import ntxent_loss
-from sfnet.gpu_transformations import GPUTransformNeuralfp
-from sfnet.data_sans_transforms import NeuralfpDataset
-from sfnet.modules.simclr import SimCLR
-from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
+from simclr.ntxent import ntxent_loss
+from simclr.simclr import SimCLR   
+from modules.transformations import GPUTransformNeuralfp
+from modules.data import NeuralfpDataset
+from sfnet.residual import SlowFastNetwork, ResidualUnit
+from baseline.encoder import Encoder
 from eval import eval_faiss
 from test_fp import create_fp_db, create_dummy_db
 
@@ -27,7 +29,7 @@ device = torch.device("cuda")
 
 parser = argparse.ArgumentParser(description='Neuralfp Training')
 parser.add_argument('--config', default=None, type=str,
-                    help='Path to training data')
+                    help='Path to config file')
 parser.add_argument('--train_dir', default=None, type=str, metavar='PATH',
                     help='path to training data')
 parser.add_argument('--val_dir', default=None, type=str, metavar='PATH',
@@ -77,7 +79,7 @@ def validate(epoch, query_loader, dummy_loader, augment, model, output_root_dir)
     if epoch==1 or epoch % 10 == 0:
         create_dummy_db(dummy_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
         create_fp_db(query_loader, augment=augment, model=model, output_root_dir=output_root_dir, verbose=False)
-        hit_rates = eval_faiss(emb_dir=output_root_dir, test_ids='all', index_type='l2', n_centroids=64)
+        hit_rates = eval_faiss(emb_dir=output_root_dir, test_ids='all', index_type='l2', n_centroids=64, nogpu=True)
         print("-------Validation hit-rates-------")
         print(f'Top-1 exact hit rate = {hit_rates[0]}')
         print(f'Top-1 near hit rate = {hit_rates[1]}')
@@ -90,7 +92,7 @@ def main():
     cfg = load_config(args.config)
     writer = SummaryWriter(f'runs/{args.ckp}')
     train_dir = override(cfg['train_dir'], args.train_dir)
-    valid_dir = override(cfg['valid_dir'], args.valid_dir)
+    valid_dir = override(cfg['val_dir'], args.val_dir)
     ir_dir = cfg['ir_dir']
     noise_dir = cfg['noise_dir']
     
@@ -154,9 +156,15 @@ def main():
 
     
     print("Creating new model...")
-    model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
+    if args.encoder == 'baseline':
+        model = SimCLR(cfg, encoder=Encoder()).to(device)
+    elif args.encoder == 'sfnet':
+        model = SimCLR(cfg, encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
+
+    print(count_parameters(model, args.encoder))
+
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = 1e-7)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = cfg['min_lr'])
        
     if args.resume:
         if os.path.isfile(args.resume):
@@ -177,6 +185,7 @@ def main():
     best_loss = float('inf')
     best_hr = 0
     # training
+
     for epoch in range(start_epoch+1, num_epochs+1):
         print("#######Epoch {}#######".format(epoch))
         loss_epoch = train(cfg, train_loader, model, optimizer, ir_train_idx, noise_train_idx, gpu_augment)
@@ -190,18 +199,23 @@ def main():
             writer.add_scalar("Exact Hit_rate (4 sec)", hit_rates[0][1], epoch)
             writer.add_scalar("Near Hit_rate (2 sec)", hit_rates[1][0], epoch)
 
+        checkpoint = {
+            'epoch': epoch,
+            'loss': loss_log,
+            'valid_acc' : hit_rate_log,
+            'hit_rate': hit_rates,
+            'state_dict': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'scheduler': scheduler.state_dict()
+        }
+        save_ckp(checkpoint, model_name, model_folder, 'current')
         if loss_epoch < best_loss:
             best_loss = loss_epoch
-            checkpoint = {
-                'epoch': epoch,
-                'loss': loss_log,
-                'valid_acc' : hit_rate_log,
-                'hit_rate': hit_rates,
-                'state_dict': model.state_dict(),
-                'optimizer': optimizer.state_dict(),
-                'scheduler': scheduler.state_dict()
-            }
-            save_ckp(checkpoint,epoch, model_name, model_folder)
+            save_ckp(checkpoint, model_name, model_folder, 'best')
+
+        if hit_rates is not None and hit_rates[0][0] > best_hr:
+            best_hr = hit_rates[0][0]
+            save_ckp(checkpoint, model_name, model_folder, epoch)
 
         # elif hit_rates is not None and hit_rates[0][0] > best_hr:
         #     best_hr = hit_rates[0][0]

@@ -15,12 +15,11 @@ from util import \
 create_fp_dir, load_config, \
 query_len_from_seconds, seconds_from_query_len, \
 load_augmentation_index
-from sfnet.data_sans_transforms import NeuralfpDataset
-from sfnet.modules.simclr import SimCLR
-from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
+from modules.data import NeuralfpDataset
+from simclr.simclr import SimCLR
+from sfnet.residual import SlowFastNetwork, ResidualUnit
 from baseline.encoder import Encoder
-from baseline.neuralfp import Neuralfp
-from sfnet.gpu_transformations import GPUTransformNeuralfp
+from modules.transformations import GPUTransformNeuralfp
 from eval import get_index, load_memmap_data, eval_faiss
 
 
@@ -162,9 +161,9 @@ def main():
             
     print("Creating Model...")
     if args.encoder == 'baseline':
-        model = Neuralfp(encoder=Encoder()).to(device)
+        model = SimCLR(cfg, encoder=Encoder()).to(device)
     elif args.encoder == 'sfnet':
-        model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
+        model = SimCLR(cfg, encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
 
 
     print("Creating dataloaders ...")

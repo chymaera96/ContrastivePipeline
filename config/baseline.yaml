@@ -41,6 +41,10 @@ freq_mask: 128
 noise_prob: 0.5
 ir_prob: 0.0
 
+# Model architecture
+d: 128
+h: 1024
+u: 32
 
 # Database sizes (validation)
 n_dummy: 200

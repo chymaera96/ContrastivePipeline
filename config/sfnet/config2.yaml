@@ -23,7 +23,6 @@ bsz_train: 256
 alpha: 4
 beta: 8
 layers: [3, 4, 6, 3]
-# layers: [2, 2, 2, 2]
 tau: 0.05
 lr: 1.0e-4
 min_lr: 3.0e-6
@@ -42,7 +41,10 @@ freq_mask: 64
 noise_prob: 0.9
 ir_prob: 0.9
 
-
+# Model architecture
+d: 128
+h: 2304
+u: 16
 
 # Database sizes (validation)
 n_dummy: 100

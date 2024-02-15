@@ -9,13 +9,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 from util import *
-from ntxent import ntxent_loss
-from sfnet.gpu_transformations import GPUTransformNeuralfp
-from sfnet.data_sans_transforms import NeuralfpDataset
-from sfnet.modules.simclr import SimCLR
-from sfnet.modules.residual import SlowFastNetwork, ResidualUnit
+from simclr.ntxent import ntxent_loss
+from simclr.simclr import SimCLR   
+from modules.transformations import GPUTransformNeuralfp
+from modules.data import NeuralfpDataset
+from sfnet.residual import SlowFastNetwork, ResidualUnit
 from baseline.encoder import Encoder
-from baseline.neuralfp import Neuralfp
 from eval import eval_faiss
 from test_fp import create_fp_db, create_dummy_db
 
@@ -166,9 +165,9 @@ def main():
     
     print("Creating new model...")
     if args.encoder == 'baseline':
-        model = Neuralfp(encoder=Encoder()).to(device)
+        model = SimCLR(cfg, encoder=Encoder()).to(device)
     elif args.encoder == 'sfnet':
-        model = SimCLR(encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
+        model = SimCLR(cfg, encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = cfg['T_max'], eta_min = cfg['min_lr'])
