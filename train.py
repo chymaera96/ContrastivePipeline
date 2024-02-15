@@ -162,7 +162,7 @@ def main():
     elif args.encoder == 'sfnet':
         model = SimCLR(cfg, encoder=SlowFastNetwork(ResidualUnit, cfg)).to(device)
     elif args.encoder == 'ast':
-        model = SimCLR(cfg, encoder=ASTEncoder(cfg)).to(device)
+        model = SimCLR(cfg, encoder=ASTEncoder()).to(device)
 
     print(count_parameters(model, args.encoder))
 
