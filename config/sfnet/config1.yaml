@@ -6,6 +6,7 @@ ir_dir: 'data/aug/ir'
 noise_dir: 'data/aug/noise'
 
 # Model input parameters
+arch: 'sfnet'
 fs: 22050
 dur: 2.0
 offset: 0.2

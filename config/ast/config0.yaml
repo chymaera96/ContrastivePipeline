@@ -6,6 +6,7 @@ ir_dir: 'data/aug/ir'
 noise_dir: 'data/aug/noise'
 
 # Model input parameters
+arch: 'ast'
 fs: 16000
 dur: 1.0
 offset: 0.05

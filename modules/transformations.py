@@ -13,6 +13,7 @@ class GPUTransformNeuralfp(nn.Module):
         self.noise_dir = noise_dir
         self.n_frames = cfg['n_frames']
         self.overlap = cfg['overlap']
+        self.arch = cfg['arch']
         self.train = train
         self.cpu = cpu
         # self.gpu_transform = Compose([
@@ -87,7 +88,7 @@ class GPUTransformNeuralfp(nn.Module):
             X_j = self.logmelspec(x_j.squeeze(0)).permute(2,0,1)
             X_j = X_j.unfold(0, size=self.n_frames, step=int(self.n_frames*(1-self.overlap)))
 
-        if self.n_frames == 240:    # sfnet has transposed shape   
+        if self.arch == 'sfnet' or self.arch == 'resnet':    # sfnet has transposed shape   
             return X_i.permute(0,1,3,2), X_j.permute(0,1,3,2)
         else:
             return X_i, X_j
