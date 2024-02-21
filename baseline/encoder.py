@@ -56,11 +56,11 @@ class Residual(nn.Module):
             kernels = [[1,1],[1,3],[1,1]]
 
         self.conv1 = nn.Sequential(
-                        nn.Conv2d(inplanes, channels[1], kernel_size = kernels[0], stride = [strides[0],1], padding = [int(kernels[0][0] / 2) ,0]),
+                        nn.Conv2d(inplanes, channels[1], kernel_size = kernels[0], stride = [1, strides[0]], padding = [int(kernels[0][0] / 2) ,0]),
                         nn.GroupNorm(channels[1], channels[1]),
                         nn.ReLU())
         self.conv2 = nn.Sequential(
-                        nn.Conv2d(channels[1], channels[1], kernel_size = kernels[1], stride = [1, strides[1]], padding = [0, int(kernels[1][1] / 2)]),
+                        nn.Conv2d(channels[1], channels[1], kernel_size = kernels[1], stride = [1, strides[1]], padding = [0, 1]),
                         nn.GroupNorm(channels[1], channels[1]),
                         nn.ReLU())
         
@@ -107,21 +107,21 @@ class ResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-    def _make_layer(self, block, channels, blocks, temporal_conv, strided=True):
+    def _make_layer(self, block, channels, blocks, temporal_conv, type=None, strided=True):
         downsample = None
         layers = []
         inplanes = channels[0]
 
         strides = [1,1,1]
         if strided:
-            strides = [2,2,1]
+            strides[0] = 2
 
         for i in range(blocks):
 
             if strides[0] != 1 or inplanes != channels[-1]:
 
                 downsample = nn.Sequential(
-                    nn.Conv2d(inplanes, channels[-1], kernel_size=1, stride=strides[0]),
+                    nn.Conv2d(inplanes, channels[-1], kernel_size=1, stride=[1,strides[0]]),
                     nn.BatchNorm2d(channels[-1]),
                 )
             else:
