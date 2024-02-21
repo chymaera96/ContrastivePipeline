@@ -21,7 +21,7 @@ n_fft: 400
 train_sz: 10000
 val_sz: 500
 bsz_train: 256
-layers: [2, 2, 2, 2]
+layers: [3, 4, 6, 3]
 tau: 0.05
 lr: 5.0e-5
 min_lr: 3.0e-6
