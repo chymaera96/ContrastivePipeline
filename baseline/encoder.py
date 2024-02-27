@@ -107,6 +107,10 @@ class ResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1) 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
+        # Adaptive pooling + attention layer
+        self.autopool_p = nn.Parameter(torch.tensor(0.).float())
+        self.autopool_p.requires_grad = True
+
     def _make_layer(self, block, channels, blocks, temporal_conv, type=None, strided=True):
         downsample = None
         layers = []
@@ -132,22 +136,30 @@ class ResNet(nn.Module):
             strides = [1,1,1]
 
         return nn.Sequential(*layers)
+    
+    def autopool_weights(self, data):
+        """
+        Calculating the autopool weights for a given tensor
+        :param data: tensor for calculating the softmax weights with autopool
+        :return: softmax weights with autopool
+        """
+        x = data * self.autopool_p
+        max_values = torch.max(x, dim=2, keepdim=True).values
+        softmax = torch.exp(x - max_values)
+        weights = softmax / torch.sum(softmax, dim=2, keepdim=True)
+
+        return weights
 
     def forward(self, x):
-        # print(f"Input shape: {x.shape}")
         x = self.conv1(x)
-        # print(f"After conv1: {x.shape}")
         x = self.layer2(x)
-        # print(f"After layer2: {x.shape}")
         x = self.layer3(x)
-        # print(f"After layer3: {x.shape}")
         x = self.layer4(x)
-        # print(f"After layer4: {x.shape}")
         x = self.layer5(x)
-        # print(f"After layer5: {x.shape}")
-        x = self.avgpool(x)
-        # print(f"After avgpool: {x.shape}")
+        # x = self.avgpool(x)
+        weights = self.autopool_weights(x[:, :int(x.shape[1] / 2)])
+        x = torch.sum(x[:, int(x.shape[1] / 2):] * weights, dim=2, keepdim=True)
+        x = torch.sigmoid(x)
         x = x.view(x.size(0), -1)
-        # print(f"After view: {x.shape}")
 
         return x
