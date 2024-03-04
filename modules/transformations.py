@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_audiomentations import Compose,AddBackgroundNoise, ApplyImpulseResponse
+from torch_audiomentations import Compose,AddBackgroundNoise, ApplyImpulseResponse, PitchShift
 from torchaudio.transforms import MelSpectrogram, TimeMasking, FrequencyMasking, AmplitudeToDB
 import warnings
 
@@ -25,7 +25,8 @@ class GPUTransformNeuralfp(nn.Module):
         #     ])
         
         self.cpu_transform = Compose([
-            ApplyImpulseResponse(ir_paths=self.ir_dir, p=cfg['ir_prob']),
+            # ApplyImpulseResponse(ir_paths=self.ir_dir, p=cfg['ir_prob']),
+            PitchShift(sample_rate=self.sample_rate, min_transpose_semitones=-4.0, max_transpose_semitones=4.0, p=0.9),
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['tr_snr'][0],
                                max_snr_in_db=cfg['tr_snr'][1], 
@@ -33,7 +34,8 @@ class GPUTransformNeuralfp(nn.Module):
             ])
         
         self.val_transform = Compose([
-            ApplyImpulseResponse(ir_paths=self.ir_dir, p=1),
+            # ApplyImpulseResponse(ir_paths=self.ir_dir, p=1),
+            PitchShift(sample_rate=self.sample_rate, min_transpose_semitones=-4.0, max_transpose_semitones=4.0, p=1),
             AddBackgroundNoise(background_paths=self.noise_dir, 
                                min_snr_in_db=cfg['val_snr'][0], 
                                max_snr_in_db=cfg['val_snr'][1], 
